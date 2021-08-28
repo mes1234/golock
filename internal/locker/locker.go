@@ -6,11 +6,13 @@ import (
 	"github.com/mes1234/golock/internal/key"
 )
 
+type LockerId = uuid.UUID // Identification of Locker
+
 // Locker is container for all secrect
 type Locker struct {
-	Id      uuid.UUID                     // Identifier of locker
-	Clients map[uuid.UUID]client.Identity // Identifiers of all clients with access
-	Secrets map[string]Secret             //Content of Locker
+	Id      LockerId                            // Identifier of locker
+	Clients map[client.ClientId]client.Identity // Identifiers of all clients with access
+	Secrets map[SecretId]Secret                 //Content of Locker
 
 }
 
@@ -21,8 +23,9 @@ type Crypter interface {
 }
 
 // PlainContent is contend which client requested to be encrypted
-type PlainContent []byte
+type PlainContent = []byte
 
+type SecretId string // identifier of Secret
 // Secret is single secret instance
 type Secret struct {
 	Id       uuid.UUID // Identifier of secret
