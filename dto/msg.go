@@ -1,11 +1,17 @@
 package dto
 
+import (
+	"github.com/google/uuid"
+	"github.com/mes1234/golock/internal/client"
+)
+
+// Domain internal add locker request
 type AddLockerRequest struct {
-	Client   string `json:"clientid"`
-	Password string `json:"password"`
+	Client client.Credentials
 }
 
+// Domain internal add locker response
 type AddLockerResponse struct {
-	LockerId string `json:"lockerid"`
-	Err      string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
+	LockerId uuid.UUID
+	Err      error
 }

@@ -2,47 +2,43 @@ package endpoints
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-kit/kit/endpoint"
-	"github.com/google/uuid"
 	"github.com/mes1234/golock/dto"
-	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/service"
 )
 
-// Container for all exported endpoints
-type Endpoints struct {
+// Prepare endpoint for access service
+func MakeAccessEndpoint(svc service.Access) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+
+		switch v := request.(type) {
+		case dto.AddLockerRequest:
+			return handleAddLockerRequest(ctx, svc, v)
+		default:
+			return dto.AddLockerResponse{},
+				errors.New("not supported request")
+		}
+	}
 }
 
-func makeAccessEndpoint(svc service.Access) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(dto.AddLockerRequest)
+// Handler for AddLockerRequest
+func handleAddLockerRequest(
+	ctx context.Context,
+	svc service.Access,
+	request dto.AddLockerRequest) (interface{}, error) {
+	v, err := svc.NewLocker(ctx, request.Client)
 
-		clientId, err := uuid.Parse(req.Client)
-
-		if err != nil {
-			return dto.AddLockerResponse{
-				LockerId: "",
-				Err:      err.Error()}, nil
-		}
-
-		credentials := client.Credentials{
-			Identity: client.Identity{
-				Id: clientId,
-			},
-			Password: client.Password{
-				Value: req.Password},
-		}
-
-		v, err := svc.NewLocker(ctx, credentials)
-
-		if err != nil {
-			return dto.AddLockerResponse{
-				LockerId: v.String(),
-				Err:      err.Error()}, nil
-		}
+	// handle error
+	if err != nil {
 		return dto.AddLockerResponse{
-			LockerId: v.String(),
-			Err:      ""}, nil
+			Err: err,
+		}, err
 	}
+
+	// return response
+	return dto.AddLockerResponse{
+		LockerId: v,
+	}, nil
 }
