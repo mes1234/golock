@@ -39,9 +39,15 @@ func EncodeHttpAddLockerResponse(_ context.Context, w http.ResponseWriter, respo
 
 	domainResponse := response.(AddLockerResponse)
 
-	responseHttp := AddLockerHttpOutboundDto{
+	var responseHttp AddLockerHttpOutboundDto
+	if domainResponse.Err != nil {
+		responseHttp = AddLockerHttpOutboundDto{
+			Err: domainResponse.Err.Error(),
+		}
+	}
+
+	responseHttp = AddLockerHttpOutboundDto{
 		LockerId: domainResponse.LockerId.String(),
-		Err:      domainResponse.Err.Error(),
 	}
 
 	return json.NewEncoder(w).Encode(responseHttp)

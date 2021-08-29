@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"context"
-	"errors"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/mes1234/golock/dto"
@@ -10,16 +9,12 @@ import (
 )
 
 // Prepare endpoint for access service
-func MakeAccessEndpoint(svc service.Access) endpoint.Endpoint {
+func MakeAddLockerEndpoint(svc service.Access) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
-		switch v := request.(type) {
-		case dto.AddLockerRequest:
-			return handleAddLockerRequest(ctx, svc, v)
-		default:
-			return dto.AddLockerResponse{},
-				errors.New("not supported request")
-		}
+		v := request.(dto.AddLockerRequest)
+		return handleAddLockerRequest(ctx, svc, v)
+
 	}
 }
 

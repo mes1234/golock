@@ -23,7 +23,9 @@ type Crypter interface {
 }
 
 // PlainContent is contend which client requested to be encrypted
-type PlainContent = []byte
+type PlainContent struct {
+	Value []byte
+}
 
 type SecretId string // identifier of Secret
 // Secret is single secret instance
