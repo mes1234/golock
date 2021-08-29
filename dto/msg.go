@@ -13,5 +13,4 @@ type AddLockerRequest struct {
 // Domain internal add locker response
 type AddLockerResponse struct {
 	LockerId uuid.UUID
-	Err      error
 }

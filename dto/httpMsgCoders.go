@@ -35,20 +35,18 @@ func DecodeHttpAddLockerRequest(_ context.Context, r *http.Request) (interface{}
 }
 
 // Decode response to Http accepted representation
-func EncodeHttpAddLockerResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+func EncodeHttpAddLockerResponse(
+	_ context.Context,
+	w http.ResponseWriter,
+	response interface{}) error {
 
 	domainResponse := response.(AddLockerResponse)
 
-	var responseHttp AddLockerHttpOutboundDto
-	if domainResponse.Err != nil {
-		responseHttp = AddLockerHttpOutboundDto{
-			Err: domainResponse.Err.Error(),
-		}
-	}
-
-	responseHttp = AddLockerHttpOutboundDto{
+	responseHttp := AddLockerHttpOutboundDto{
 		LockerId: domainResponse.LockerId.String(),
 	}
 
-	return json.NewEncoder(w).Encode(responseHttp)
+	json.NewEncoder(w).Encode(responseHttp)
+
+	return nil
 }

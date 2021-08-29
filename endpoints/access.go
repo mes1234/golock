@@ -27,9 +27,7 @@ func handleAddLockerRequest(
 
 	// handle error
 	if err != nil {
-		return dto.AddLockerResponse{
-			Err: err,
-		}, err
+		return nil, err
 	}
 
 	// return response

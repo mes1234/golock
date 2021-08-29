@@ -9,5 +9,4 @@ type AddLockerHttpInboundDto struct {
 // Http accepted representation of add locker response
 type AddLockerHttpOutboundDto struct {
 	LockerId string `json:"lockerid"`
-	Err      string `json:"err,omitempty"` // errors don't JSON-marshal, so we use a string
 }
