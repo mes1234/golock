@@ -2,13 +2,28 @@ package service
 
 import (
 	"context"
+	"time"
 
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/locker"
 )
 
+type accessService struct {
+	logger log.Logger
+	mw     metrics.Counter
+}
+
+func NewAccessService(log log.Logger, mw metrics.Counter) AccessService {
+	return &accessService{
+		logger: log,
+		mw:     mw,
+	}
+}
+
 // Add item to locker
-func (AccessService) Add(
+func (s accessService) Add(
 	ctx context.Context,
 	client client.Credentials, // Identification of client
 	lockerId locker.LockerId, // Identification of locker to insert into
@@ -19,7 +34,7 @@ func (AccessService) Add(
 }
 
 // Get item from locker
-func (AccessService) Get(
+func (s accessService) Get(
 	ctx context.Context,
 	client client.Credentials, // Identification of client
 	lockerId locker.LockerId, // Identification of locker to insert into
@@ -31,7 +46,7 @@ func (AccessService) Get(
 }
 
 // Delete item from locker
-func (AccessService) Deleted(
+func (s accessService) Deleted(
 	ctx context.Context,
 	client client.Credentials, // Identification of client
 	lockerId locker.LockerId, // Identification of locker to insert into
@@ -41,9 +56,17 @@ func (AccessService) Deleted(
 }
 
 // Add new locker
-func (AccessService) NewLocker(
+func (s accessService) NewLocker(
 	ctx context.Context,
 	client client.Credentials, // Identification of client
 ) (locker.LockerId, error) {
+
+	defer func(begin time.Time) {
+		lvs := []string{"method", "Add", "error", "false"}
+		s.mw.With(lvs...).Add(1)
+	}(time.Now())
+
+	logger := log.With(s.logger, "method", "Add")
+	logger.Log("Successfully added locker {id}", client.Identity.Id)
 	return client.Identity.Id, nil
 }

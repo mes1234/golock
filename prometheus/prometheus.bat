@@ -1,0 +1,1 @@
+docker   run -p 9090:9090 --mount type=bind,source=%cd%/prometheus.yml,target=/prometheus.yml,readonly   prom/prometheus   --config.file="/prometheus.yml"

@@ -9,7 +9,7 @@ import (
 )
 
 // Prepare endpoint for access service
-func MakeAddLockerEndpoint(svc service.Access) endpoint.Endpoint {
+func MakeAddLockerEndpoint(svc service.AccessService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
 		v := request.(dto.AddLockerRequest)
@@ -21,7 +21,7 @@ func MakeAddLockerEndpoint(svc service.Access) endpoint.Endpoint {
 // Handler for AddLockerRequest
 func handleAddLockerRequest(
 	ctx context.Context,
-	svc service.Access,
+	svc service.AccessService,
 	request dto.AddLockerRequest) (interface{}, error) {
 	v, err := svc.NewLocker(ctx, request.Client)
 

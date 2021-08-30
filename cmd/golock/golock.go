@@ -5,20 +5,29 @@ import (
 	"os"
 
 	"github.com/go-kit/kit/log"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/mes1234/golock/dto"
 	"github.com/mes1234/golock/endpoints"
-	"github.com/mes1234/golock/internal/middlewares"
 	"github.com/mes1234/golock/service"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
 	logger := log.NewLogfmtLogger(os.Stderr)
 
-	svc := service.AccessService{}
+	fieldKeys := []string{"method", "error"}
+	requestCount := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "my_group",
+		Subsystem: "string_service",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys)
+
+	svc := service.NewAccessService(logger, requestCount)
 
 	addLockerEndpoint := endpoints.MakeAddLockerEndpoint(svc)
-	addLockerEndpoint = middlewares.LoggingMiddleware(log.With(logger, "method", "addLockerEndpoint"))(addLockerEndpoint)
 
 	lockerHandler := httptransport.NewServer(
 		addLockerEndpoint,
@@ -27,5 +36,6 @@ func main() {
 	)
 
 	http.Handle("/addlocker", lockerHandler)
+	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":8080", nil)
 }

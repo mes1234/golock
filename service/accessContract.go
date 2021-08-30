@@ -7,10 +7,8 @@ import (
 	"github.com/mes1234/golock/internal/locker"
 )
 
-type AccessService struct{}
-
 //Access interface describes a service that insert and retrieve data
-type Access interface {
+type AccessService interface {
 
 	// Add item to locker
 	Add(
