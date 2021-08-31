@@ -10,6 +10,13 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd/golock/golock.go"
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
         }
     ]
 }

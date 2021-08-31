@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
@@ -12,10 +11,10 @@ import (
 
 type accessService struct {
 	logger log.Logger
-	mw     metrics.Counter
+	mw     metrics.Gauge
 }
 
-func NewAccessService(log log.Logger, mw metrics.Counter) AccessService {
+func NewAccessService(log log.Logger, mw metrics.Gauge) AccessService {
 	return &accessService{
 		logger: log,
 		mw:     mw,
@@ -61,12 +60,9 @@ func (s accessService) NewLocker(
 	client client.Credentials, // Identification of client
 ) (locker.LockerId, error) {
 
-	defer func(begin time.Time) {
-		lvs := []string{"method", "Add", "error", "false"}
-		s.mw.With(lvs...).Add(1)
-	}(time.Now())
-
 	logger := log.With(s.logger, "method", "Add")
 	logger.Log("Successfully added locker {id}", client.Identity.Id)
+
+	// time.Sleep(100 * time.Millisecond)
 	return client.Identity.Id, nil
 }
