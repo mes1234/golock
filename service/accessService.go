@@ -4,20 +4,17 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/metrics"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/locker"
 )
 
 type accessService struct {
 	logger log.Logger
-	mw     metrics.Gauge
 }
 
-func NewAccessService(log log.Logger, mw metrics.Gauge) AccessService {
+func NewAccessService(log log.Logger) AccessService {
 	return &accessService{
 		logger: log,
-		mw:     mw,
 	}
 }
 

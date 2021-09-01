@@ -9,12 +9,16 @@ import (
 )
 
 // Prepare endpoint for access service
-func MakeAddLockerEndpoint(svc service.AccessService) endpoint.Endpoint {
+func MakeEndpoint(svc service.AccessService, endpoint string) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 
-		v := request.(dto.AddLockerRequest)
-		return handleAddLockerRequest(ctx, svc, v)
-
+		switch endpoint {
+		case "addlocker":
+			v := request.(dto.AddLockerRequest)
+			return handleAddLockerRequest(ctx, svc, v)
+		default:
+			panic("wrong endpoint name")
+		}
 	}
 }
 

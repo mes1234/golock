@@ -5,39 +5,65 @@ import (
 	"os"
 
 	"github.com/go-kit/kit/log"
-	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/mes1234/golock/dto"
 	"github.com/mes1234/golock/endpoints"
 	"github.com/mes1234/golock/middlewares"
 	"github.com/mes1234/golock/service"
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
 	logger := log.NewLogfmtLogger(os.Stderr)
 
-	fieldKeys := []string{"method", "error"}
-	requstTimer := kitprometheus.NewGaugeFrom(stdprometheus.GaugeOpts{
-		Namespace: "golock",
-		Subsystem: "access",
-		Name:      "request_timer",
-		Help:      "execution time of request",
-	}, fieldKeys)
+	svc := service.NewAccessService(logger)
 
-	svc := service.NewAccessService(logger, requstTimer)
+	addLockerEndpoint := endpoints.MakeEndpoint(svc, "addlocker")
+	addItemEndpoint := endpoints.MakeEndpoint(svc, "additem")
+	getItemEndpoint := endpoints.MakeEndpoint(svc, "getitem")
+	deleteItemEndpoint := endpoints.MakeEndpoint(svc, "deleteitem")
 
-	addLockerEndpoint := endpoints.MakeAddLockerEndpoint(svc)
-	addLockerEndpoint = middlewares.TimingMetricMiddleware(*requstTimer)(addLockerEndpoint)
+	// Attach Metrics
+	requstTimer := middlewares.NewPrometheusTimer()
+	addLockerEndpoint = requstTimer.TimingMetricMiddleware()(addLockerEndpoint)
+	addItemEndpoint = requstTimer.TimingMetricMiddleware()(addItemEndpoint)
+	getItemEndpoint = requstTimer.TimingMetricMiddleware()(getItemEndpoint)
+	deleteItemEndpoint = requstTimer.TimingMetricMiddleware()(deleteItemEndpoint)
 
-	lockerHandler := httptransport.NewServer(
+	// Create Handlers
+	addLockerHandler := httptransport.NewServer(
 		addLockerEndpoint,
 		dto.DecodeHttpAddLockerRequest,
 		dto.EncodeHttpAddLockerResponse,
 	)
+	addItemToLockerHandler := httptransport.NewServer(
+		addItemEndpoint,
+		dto.DecodeHttpAddLockerRequest,
+		dto.EncodeHttpAddLockerResponse,
+	)
+	getItemFromLockerHandler := httptransport.NewServer(
+		getItemEndpoint,
+		dto.DecodeHttpAddLockerRequest,
+		dto.EncodeHttpAddLockerResponse,
+	)
+	deleteFromLockerHandler := httptransport.NewServer(
+		deleteItemEndpoint,
+		dto.DecodeHttpAddLockerRequest,
+		dto.EncodeHttpAddLockerResponse,
+	)
 
-	http.Handle("/addlocker", lockerHandler)
+	// Expose HTTP endpoints
+	{
+		http.Handle("/addlocker", addLockerHandler)
+		http.Handle("/add", addItemToLockerHandler)
+		http.Handle("/get", getItemFromLockerHandler)
+		http.Handle("delete", deleteFromLockerHandler)
+	}
+
+	// Expose metrics
 	http.Handle("/metrics", promhttp.Handler())
+
+	// Start server
 	http.ListenAndServe(":8080", nil)
 }
