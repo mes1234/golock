@@ -1,24 +1,23 @@
-package dto
+package adapters
 
 import (
-	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/locker"
 )
 
 // Domain internal add locker request
 type AddLockerRequest struct {
-	Client client.ClientId
+	ClientId client.ClientId
 }
 
 // Domain internal add locker response
 type AddLockerResponse struct {
-	LockerId uuid.UUID
+	LockerId locker.LockerId
 }
 
 // Domain internal add item request
 type AddItemRequest struct {
-	Client   client.ClientId     // Identification of client
+	ClientId client.ClientId     // Identification of client
 	LockerId locker.LockerId     // Identification of locker to insert into
 	SecretId locker.SecretId     // Identification of secret to get
 	Content  locker.PlainContent // Content which shall be injected
@@ -30,7 +29,7 @@ type AddItemResponse struct {
 }
 
 type RemoveItemRequest struct {
-	Client   client.ClientId // Identification of client
+	ClientId client.ClientId // Identification of client
 	LockerId locker.LockerId // Identification of locker to insert into
 	SecretId locker.SecretId // Identification of secret to get
 }
@@ -40,7 +39,7 @@ type RemoveItemResponse struct {
 }
 
 type GetItemRequest struct {
-	Client   client.ClientId // Identification of client
+	ClientId client.ClientId // Identification of client
 	LockerId locker.LockerId // Identification of locker to insert into
 	SecretId locker.SecretId // Identification of secret to get
 }

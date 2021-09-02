@@ -22,14 +22,14 @@ func main() {
 	addLockerEndpoint := endpoints.MakeEndpoint(svc, "addlocker")
 	addItemEndpoint := endpoints.MakeEndpoint(svc, "additem")
 	getItemEndpoint := endpoints.MakeEndpoint(svc, "getitem")
-	deleteItemEndpoint := endpoints.MakeEndpoint(svc, "deleteitem")
+	removeItemEndpoint := endpoints.MakeEndpoint(svc, "removeitem")
 
 	// Attach Metrics
 	requstTimer := middlewares.NewPrometheusTimer()
 	addLockerEndpoint = requstTimer.TimingMetricMiddleware()(addLockerEndpoint)
 	addItemEndpoint = requstTimer.TimingMetricMiddleware()(addItemEndpoint)
 	getItemEndpoint = requstTimer.TimingMetricMiddleware()(getItemEndpoint)
-	deleteItemEndpoint = requstTimer.TimingMetricMiddleware()(deleteItemEndpoint)
+	removeItemEndpoint = requstTimer.TimingMetricMiddleware()(removeItemEndpoint)
 
 	// Create Handlers
 	addLockerHandler := httptransport.NewServer(
@@ -39,18 +39,18 @@ func main() {
 	)
 	addItemToLockerHandler := httptransport.NewServer(
 		addItemEndpoint,
-		dto.DecodeHttpAddLockerRequest,
-		dto.EncodeHttpAddLockerResponse,
+		dto.DecodeHttpAddItemRequest,
+		dto.EncodeHttpAddItemResponse,
 	)
 	getItemFromLockerHandler := httptransport.NewServer(
 		getItemEndpoint,
-		dto.DecodeHttpAddLockerRequest,
-		dto.EncodeHttpAddLockerResponse,
+		dto.DecodeHttpGetItemRequest,
+		dto.EncodeHttpGetItemResponse,
 	)
-	deleteFromLockerHandler := httptransport.NewServer(
-		deleteItemEndpoint,
-		dto.DecodeHttpAddLockerRequest,
-		dto.EncodeHttpAddLockerResponse,
+	removeFromLockerHandler := httptransport.NewServer(
+		removeItemEndpoint,
+		dto.DecodeHttpRemoveItemRequest,
+		dto.EncodeHttpRemoveItemResponse,
 	)
 
 	// Expose HTTP endpoints
@@ -58,7 +58,7 @@ func main() {
 		http.Handle("/addlocker", addLockerHandler)
 		http.Handle("/add", addItemToLockerHandler)
 		http.Handle("/get", getItemFromLockerHandler)
-		http.Handle("delete", deleteFromLockerHandler)
+		http.Handle("/remove", removeFromLockerHandler)
 	}
 
 	// Expose metrics
