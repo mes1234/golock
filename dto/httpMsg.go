@@ -2,8 +2,7 @@ package dto
 
 // Http accepted representation of add locker request
 type AddLockerHttpInboundDto struct {
-	Client   string `json:"clientid"`
-	Password string `json:"password"`
+	Client string `json:"clientid"`
 }
 
 // Http accepted representation of add locker response

@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/mes1234/golock/internal/client"
 )
 
 // Decode Http inbound message to domain accepted message
@@ -21,14 +20,7 @@ func DecodeHttpAddLockerRequest(_ context.Context, r *http.Request) (interface{}
 	}
 
 	request := AddLockerRequest{
-		Client: client.Credentials{
-			Identity: client.Identity{
-				Id: clientId,
-			},
-			Password: client.Password{
-				Value: requestHttp.Password,
-			},
-		},
+		Client: clientId,
 	}
 
 	return request, nil

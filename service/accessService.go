@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/mes1234/golock/dto"
-	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/locker"
 )
 
@@ -30,23 +29,22 @@ func (s accessService) Add(
 // Get item from locker
 func (s accessService) Get(
 	ctx context.Context,
-	client client.Credentials, // Identification of client
-	lockerId locker.LockerId, // Identification of locker to insert into
-	secretId locker.SecretId, // Identification of secret to get
-) (locker.PlainContent, error) {
-	return locker.PlainContent{
-		Value: make([]byte, 0),
-	}, nil
+	request dto.GetItemRequest,
+) (dto.GetItemResponse, error) {
+	return dto.GetItemResponse{
+		Content: locker.PlainContent{
+			Value: make([]byte, 0),
+		}}, nil
 }
 
-// Delete item from locker
-func (s accessService) Deleted(
+// Remove item from locker
+func (s accessService) Remove(
 	ctx context.Context,
-	client client.Credentials, // Identification of client
-	lockerId locker.LockerId, // Identification of locker to insert into
-	secretId locker.SecretId, // Identification of secret to get
-) (bool, error) {
-	return true, nil
+	request dto.RemoveItemRequest,
+) (dto.RemoveItemResponse, error) {
+	return dto.RemoveItemResponse{
+		Status: true,
+	}, nil
 }
 
 // Add new locker
@@ -56,10 +54,10 @@ func (s accessService) NewLocker(
 ) (dto.AddLockerResponse, error) {
 
 	logger := log.With(s.logger, "method", "Add")
-	logger.Log("Successfully added locker {id}", request.Client.Identity.Id)
+	logger.Log("Successfully added locker {id}", request.Client)
 
 	response := dto.AddLockerResponse{
-		LockerId: request.Client.Identity.Id,
+		LockerId: request.Client,
 	}
 	return response, nil
 }
