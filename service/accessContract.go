@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/mes1234/golock/dto"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/locker"
 )
@@ -13,11 +14,8 @@ type AccessService interface {
 	// Add item to locker
 	Add(
 		ctx context.Context,
-		client client.Credentials, // Identification of client
-		lockerId locker.LockerId, // Identification of locker to insert into
-		secretId locker.SecretId, // Identification of secret to get
-		content locker.PlainContent, // Content which shall be injected
-	) (bool, error) // status of operation
+		request dto.AddItemRequest,
+	) (dto.AddItemResponse, error) // status of operation
 
 	// Get item from locker
 	Get(
@@ -38,6 +36,6 @@ type AccessService interface {
 	// Add new locker
 	NewLocker(
 		ctx context.Context,
-		client client.Credentials, // Identification of client
-	) (locker.LockerId, error) // Identification of locker
+		request dto.AddLockerRequest, // Identification of client
+	) (dto.AddLockerResponse, error) // Identification of locker
 }

@@ -16,6 +16,9 @@ func MakeEndpoint(svc service.AccessService, endpoint string) endpoint.Endpoint 
 		case "addlocker":
 			v := request.(dto.AddLockerRequest)
 			return handleAddLockerRequest(ctx, svc, v)
+		case "additem":
+			v := request.(dto.AddItemRequest)
+			return handleAddItemRequest(ctx, svc, v)
 		default:
 			panic("wrong endpoint name")
 		}
@@ -27,15 +30,27 @@ func handleAddLockerRequest(
 	ctx context.Context,
 	svc service.AccessService,
 	request dto.AddLockerRequest) (interface{}, error) {
-	v, err := svc.NewLocker(ctx, request.Client)
+	v, err := svc.NewLocker(ctx, request)
 
 	// handle error
 	if err != nil {
 		return nil, err
 	}
-
 	// return response
-	return dto.AddLockerResponse{
-		LockerId: v,
-	}, nil
+	return v, nil
+}
+
+// Handler for AddItemRequest
+func handleAddItemRequest(
+	ctx context.Context,
+	svc service.AccessService,
+	request dto.AddItemRequest) (interface{}, error) {
+	v, err := svc.Add(ctx, request)
+
+	// handle error
+	if err != nil {
+		return nil, err
+	}
+	// return response
+	return v, nil
 }
