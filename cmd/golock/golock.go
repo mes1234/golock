@@ -4,8 +4,11 @@ import (
 	"net/http"
 	"os"
 
+	jwt "github.com/dgrijalva/jwt-go"
+	gokitjwt "github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/mes1234/golock/auth"
 	"github.com/mes1234/golock/dto"
 	"github.com/mes1234/golock/endpoints"
 	"github.com/mes1234/golock/middlewares"
@@ -26,16 +29,25 @@ func main() {
 
 	// Attach Metrics
 	requstTimer := middlewares.NewPrometheusTimer()
+
 	addLockerEndpoint = requstTimer.TimingMetricMiddleware()(addLockerEndpoint)
 	addItemEndpoint = requstTimer.TimingMetricMiddleware()(addItemEndpoint)
 	getItemEndpoint = requstTimer.TimingMetricMiddleware()(getItemEndpoint)
 	removeItemEndpoint = requstTimer.TimingMetricMiddleware()(removeItemEndpoint)
+
+	// Attach Authentication
+
+	addLockerEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(addLockerEndpoint)
+	jwtOptions := []httptransport.ServerOption{
+		httptransport.ServerBefore(gokitjwt.HTTPToContext()),
+	}
 
 	// Create Handlers
 	addLockerHandler := httptransport.NewServer(
 		addLockerEndpoint,
 		dto.DecodeHttpAddLockerRequest,
 		dto.EncodeHttpAddLockerResponse,
+		jwtOptions...,
 	)
 	addItemToLockerHandler := httptransport.NewServer(
 		addItemEndpoint,

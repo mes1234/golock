@@ -12,15 +12,13 @@ import (
 )
 
 // Decode Http inbound message to domain accepted message
-func DecodeHttpAddLockerRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeHttpAddLockerRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	var requestHttp AddLockerHttpInboundDto
 	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
 		return nil, err
 	}
-	clientId, err := uuid.Parse(requestHttp.ClientId)
-	if err != nil {
-		return nil, err
-	}
+
+	clientId, _ := uuid.Parse("b48f5b98-e9e7-40ce-b8cf-cdc4d2c59061")
 
 	request := adapters.AddLockerRequest{
 		ClientId: clientId,

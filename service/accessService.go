@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 
+	"github.com/dgrijalva/jwt-go"
+	gokitjwt "github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/log"
 	"github.com/mes1234/golock/adapters"
 	"github.com/mes1234/golock/internal/locker"
@@ -53,8 +55,9 @@ func (s accessService) NewLocker(
 	request adapters.AddLockerRequest, // Identification of client
 ) (adapters.AddLockerResponse, error) {
 
+	data := ctx.Value(gokitjwt.JWTClaimsContextKey).(*jwt.StandardClaims)
 	logger := log.With(s.logger, "method", "Add")
-	logger.Log("Successfully added locker {id}", request.ClientId)
+	logger.Log("Successfully added locker {id}", data.Id)
 
 	response := adapters.AddLockerResponse{
 		LockerId: request.ClientId,
