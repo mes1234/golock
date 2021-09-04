@@ -18,11 +18,7 @@ func DecodeHttpAddLockerRequest(ctx context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
-	clientId, _ := uuid.Parse("b48f5b98-e9e7-40ce-b8cf-cdc4d2c59061")
-
-	request := adapters.AddLockerRequest{
-		ClientId: clientId,
-	}
+	request := adapters.AddLockerRequest{}
 
 	return request, nil
 }
@@ -108,6 +104,20 @@ func DecodeHttpGetItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	return request, nil
 }
 
+// Decode Http inbound message to domain accepted message
+func DecodeHttpGetTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var requestHttp GetTokenHttpInboundDto
+	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
+		return nil, err
+	}
+	request := adapters.TokenRequest{
+		Username: requestHttp.Username,
+		Password: requestHttp.Password,
+	}
+
+	return request, nil
+}
+
 // Encode response to Http accepted representation
 func EncodeHttpAddLockerResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 
@@ -157,6 +167,19 @@ func EncodeHttpGetItemResponse(_ context.Context, w http.ResponseWriter, respons
 
 	responseHttp := GetItemHttpOutboundDto{
 		Content: base64.RawStdEncoding.EncodeToString(domainResponse.Content.Value),
+	}
+
+	json.NewEncoder(w).Encode(responseHttp)
+
+	return nil
+}
+
+// Encode response to Http accepted representation
+func EncodeHttpGetTokenResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	domainResponse := response.(adapters.TokenResponse)
+
+	responseHttp := GetTokenHttpOutboundDto{
+		Token: domainResponse.Token,
 	}
 
 	json.NewEncoder(w).Encode(responseHttp)

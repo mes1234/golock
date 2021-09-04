@@ -21,11 +21,14 @@ func main() {
 	logger := log.NewLogfmtLogger(os.Stderr)
 
 	svc := service.NewAccessService(logger)
+	tokenService := service.NewTokenService(logger)
 
 	addLockerEndpoint := endpoints.MakeEndpoint(svc, "addlocker")
 	addItemEndpoint := endpoints.MakeEndpoint(svc, "additem")
 	getItemEndpoint := endpoints.MakeEndpoint(svc, "getitem")
 	removeItemEndpoint := endpoints.MakeEndpoint(svc, "removeitem")
+
+	tokenEndpoint := endpoints.MakeTokenEndpoint(tokenService)
 
 	// Attach Metrics
 	requstTimer := middlewares.NewPrometheusTimer()
@@ -34,7 +37,11 @@ func main() {
 	addItemEndpoint = requstTimer.TimingMetricMiddleware()(addItemEndpoint)
 	getItemEndpoint = requstTimer.TimingMetricMiddleware()(getItemEndpoint)
 	removeItemEndpoint = requstTimer.TimingMetricMiddleware()(removeItemEndpoint)
+	tokenEndpoint = requstTimer.TimingMetricMiddleware()(tokenEndpoint)
 
+	// Attach  Authorization
+
+	addLockerEndpoint = middlewares.AuthorizationMiddleware(logger)(addLockerEndpoint)
 	// Attach Authentication
 
 	addLockerEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(addLockerEndpoint)
@@ -65,12 +72,19 @@ func main() {
 		dto.EncodeHttpRemoveItemResponse,
 	)
 
+	tokenHandler := httptransport.NewServer(
+		tokenEndpoint,
+		dto.DecodeHttpGetTokenRequest,
+		dto.EncodeHttpGetTokenResponse,
+	)
+
 	// Expose HTTP endpoints
 	{
 		http.Handle("/addlocker", addLockerHandler)
 		http.Handle("/add", addItemToLockerHandler)
 		http.Handle("/get", getItemFromLockerHandler)
 		http.Handle("/remove", removeFromLockerHandler)
+		http.Handle("/token", tokenHandler)
 	}
 
 	// Expose metrics

@@ -1,9 +1,19 @@
 package adapters
 
 import (
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/locker"
 )
+
+type ClientAssigner interface {
+	AssignClientId(uuid.UUID) interface{}
+}
+
+func (msg AddLockerRequest) AssignClientId(id uuid.UUID) interface{} {
+	msg.ClientId = id
+	return msg
+}
 
 // Domain internal add locker request
 type AddLockerRequest struct {
@@ -46,4 +56,13 @@ type GetItemRequest struct {
 
 type GetItemResponse struct {
 	Content locker.PlainContent // Content which shall responded
+}
+
+type TokenRequest struct {
+	Username string
+	Password string
+}
+
+type TokenResponse struct {
+	Token string
 }

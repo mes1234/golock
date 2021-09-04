@@ -45,3 +45,14 @@ type GetItemHttpInboundDto struct {
 type GetItemHttpOutboundDto struct {
 	Content string `json:"content"`
 }
+
+// Http accepted representation of get token request
+type GetTokenHttpInboundDto struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Http accepted representation of get token response
+type GetTokenHttpOutboundDto struct {
+	Token string `json:"token"`
+}
