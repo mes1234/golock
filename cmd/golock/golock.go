@@ -12,6 +12,7 @@ import (
 	"github.com/mes1234/golock/dto"
 	"github.com/mes1234/golock/endpoints"
 	"github.com/mes1234/golock/middlewares"
+	"github.com/mes1234/golock/persistance"
 	"github.com/mes1234/golock/service"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -22,6 +23,8 @@ func main() {
 
 	svc := service.NewAccessService(logger)
 	tokenService := service.NewTokenService(logger)
+
+	go persistance.Run()
 
 	addLockerEndpoint := endpoints.MakeEndpoint(svc, "addlocker")
 	addItemEndpoint := endpoints.MakeEndpoint(svc, "additem")
