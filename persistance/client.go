@@ -2,7 +2,6 @@ package persistance
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -15,49 +14,94 @@ import (
 
 var client *mongo.Client
 
-func init() {
+type ClientRepository interface {
+	Insert(*adapters.Client) error   //Insert client data to DB and assing ID
+	Retrieve(*adapters.Client) error // Get id for given username and password if matched
+}
+
+type clientRepository struct{}
+
+func NewClientRepository() ClientRepository {
+	return &clientRepository{}
+}
+
+func (cr clientRepository) Insert(clientDetails *adapters.Client) (err error) {
+
+	collection, ctx := getDbCollection()
+
+	clientDetails.ClientId = uuid.New()
+
+	document, err := convertToMongoDocument(clientDetails)
+	if err != nil {
+		return
+	}
+
+	collection.InsertOne(ctx, document)
+	err = nil
+
+	collection.Database().Client().Disconnect(ctx)
+	return
+}
+
+func (cr clientRepository) Retrieve(clientDetails *adapters.Client) (err error) {
+
+	collection, ctx := getDbCollection()
+
+	var data interface{}
+
+	if clientDetails.ClientName != "" {
+		data, _ = convertToMongoDocument(adapters.ClientName{
+			ClientName: clientDetails.ClientName,
+		})
+	} else {
+		data, _ = convertToMongoDocument(adapters.ClientId{
+			ClientId: clientDetails.ClientId,
+		})
+	}
+
+	filterCursor, err := collection.Find(ctx, data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	filterCursor.Next(ctx)
+
+	current := filterCursor.Current
+
+	bson.Unmarshal(current, &clientDetails)
+
+	collection.Database().Client().Disconnect(ctx)
+
+	err = nil
+	return
+}
+
+// Retrieve collection to operate
+func getDbCollection() (collection *mongo.Collection, ctx context.Context) {
 	var err error
 	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:example@localhost:27017/"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Disconnect(ctx)
 
-	databases, err := client.ListDatabaseNames(ctx, bson.M{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(databases)
+	collection = client.Database("clients").Collection("clients")
 
-	collection := client.Database("clients").Collection("clients")
-
-	client := adapters.Client{
-		ClientName: "witek",
-		ClientId:   uuid.New(),
-		Password:   "hashahshh",
-	}
-	document, _ := toDoc(client)
-
-	collection.InsertOne(ctx, document)
+	return
 
 }
 
-func Run() {
-
-}
-
-func toDoc(v interface{}) (doc *bson.D, err error) {
+// convert any object to mongo document
+func convertToMongoDocument(v interface{}) (doc *bson.D, err error) {
 	data, err := bson.Marshal(v)
 	if err != nil {
 		return
 	}
-
 	err = bson.Unmarshal(data, &doc)
 	return
 }

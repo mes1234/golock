@@ -12,7 +12,6 @@ import (
 	"github.com/mes1234/golock/dto"
 	"github.com/mes1234/golock/endpoints"
 	"github.com/mes1234/golock/middlewares"
-	"github.com/mes1234/golock/persistance"
 	"github.com/mes1234/golock/service"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -23,8 +22,6 @@ func main() {
 
 	svc := service.NewAccessService(logger)
 	tokenService := service.NewTokenService(logger)
-
-	go persistance.Run()
 
 	addLockerEndpoint := endpoints.MakeEndpoint(svc, "addlocker")
 	addItemEndpoint := endpoints.MakeEndpoint(svc, "additem")
@@ -45,9 +42,17 @@ func main() {
 	// Attach  Authorization
 
 	addLockerEndpoint = middlewares.AuthorizationMiddleware(logger)(addLockerEndpoint)
+	addItemEndpoint = middlewares.AuthorizationMiddleware(logger)(addItemEndpoint)
+	getItemEndpoint = middlewares.AuthorizationMiddleware(logger)(getItemEndpoint)
+	removeItemEndpoint = middlewares.AuthorizationMiddleware(logger)(removeItemEndpoint)
+
 	// Attach Authentication
 
 	addLockerEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(addLockerEndpoint)
+	addItemEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(addItemEndpoint)
+	getItemEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(getItemEndpoint)
+	removeItemEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(removeItemEndpoint)
+
 	jwtOptions := []httptransport.ServerOption{
 		httptransport.ServerBefore(gokitjwt.HTTPToContext()),
 	}
@@ -63,16 +68,19 @@ func main() {
 		addItemEndpoint,
 		dto.DecodeHttpAddItemRequest,
 		dto.EncodeHttpAddItemResponse,
+		jwtOptions...,
 	)
 	getItemFromLockerHandler := httptransport.NewServer(
 		getItemEndpoint,
 		dto.DecodeHttpGetItemRequest,
 		dto.EncodeHttpGetItemResponse,
+		jwtOptions...,
 	)
 	removeFromLockerHandler := httptransport.NewServer(
 		removeItemEndpoint,
 		dto.DecodeHttpRemoveItemRequest,
 		dto.EncodeHttpRemoveItemResponse,
+		jwtOptions...,
 	)
 
 	tokenHandler := httptransport.NewServer(
