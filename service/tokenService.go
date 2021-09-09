@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-kit/kit/log"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
+	"github.com/mes1234/golock/auth"
 	"github.com/mes1234/golock/persistance"
 )
 
@@ -27,9 +29,15 @@ func (t tokenService) GetToken(
 
 	repository.Retrieve(&client)
 
-	return adapters.TokenResponse{
-		Token: getToken(client.ClientId),
-	}, nil
+	salted := request.Password + client.ClientId.String()
+	if auth.CheckPasswordHash(salted, client.Password) {
+		return adapters.TokenResponse{
+			Token: getToken(client.ClientId),
+		}, nil
+	} else {
+		return adapters.TokenResponse{}, errors.New("Authentication error")
+	}
+
 }
 
 func NewTokenService(log log.Logger) TokenService {

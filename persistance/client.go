@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,8 +27,6 @@ func NewClientRepository() ClientRepository {
 func (cr clientRepository) Insert(clientDetails *adapters.Client) (err error) {
 
 	collection, ctx := getDbCollection()
-
-	clientDetails.ClientId = uuid.New()
 
 	document, err := convertToMongoDocument(clientDetails)
 	if err != nil {
