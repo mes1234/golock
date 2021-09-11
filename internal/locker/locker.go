@@ -11,7 +11,7 @@ type LockerId = uuid.UUID // Identification of Locker
 // Locker is container for all secrect
 type Locker struct {
 	Id      LockerId            // Identifier of locker
-	Clients []client.ClientId   // Identifiers of all clients with access
+	Client  client.ClientId     // Identifiers of all clients with access
 	Secrets map[SecretId]Secret //Content of Locker
 
 }
