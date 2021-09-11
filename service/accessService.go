@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/log"
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
 	"github.com/mes1234/golock/internal/locker"
 )
@@ -54,7 +55,7 @@ func (s accessService) NewLocker(
 ) (adapters.AddLockerResponse, error) {
 
 	response := adapters.AddLockerResponse{
-		LockerId: request.ClientId,
+		LockerId: uuid.New(),
 	}
 	return response, nil
 }

@@ -2,10 +2,14 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-kit/kit/log"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
+	"github.com/mes1234/golock/auth"
+	"github.com/mes1234/golock/persistance"
 )
 
 type tokenService struct {
@@ -16,9 +20,24 @@ func (t tokenService) GetToken(
 	ctx context.Context,
 	request adapters.TokenRequest,
 ) (adapters.TokenResponse, error) {
-	return adapters.TokenResponse{
-		Token: getToken(),
-	}, nil
+
+	repository := persistance.NewClientRepository()
+
+	client := adapters.Client{
+		ClientName: request.Username,
+	}
+
+	repository.Retrieve(&client)
+
+	salted := request.Password + client.ClientId.String()
+	if auth.CheckPasswordHash(salted, client.Password) {
+		return adapters.TokenResponse{
+			Token: getToken(client.ClientId),
+		}, nil
+	} else {
+		return adapters.TokenResponse{}, errors.New("Authentication error")
+	}
+
 }
 
 func NewTokenService(log log.Logger) TokenService {
@@ -27,12 +46,12 @@ func NewTokenService(log log.Logger) TokenService {
 	}
 }
 
-func getToken() string {
+func getToken(clientId uuid.UUID) string {
 	key := []byte("test")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.StandardClaims{
-			Id: "b48f5b98-e9e7-40ce-b8cf-cdc4d2c59061",
+			Id: clientId.String(),
 		})
 	tokenString, _ := token.SignedString(key)
 	return tokenString

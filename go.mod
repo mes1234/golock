@@ -9,5 +9,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/uuid v1.3.0
 	github.com/prometheus/client_golang v1.11.0
-	golang.org/x/sys v0.0.0-20210603081109-ebe580a85c40 // indirect
+	go.mongodb.org/mongo-driver v1.7.2 // indirect
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 )

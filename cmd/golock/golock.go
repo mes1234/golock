@@ -42,9 +42,17 @@ func main() {
 	// Attach  Authorization
 
 	addLockerEndpoint = middlewares.AuthorizationMiddleware(logger)(addLockerEndpoint)
+	addItemEndpoint = middlewares.AuthorizationMiddleware(logger)(addItemEndpoint)
+	getItemEndpoint = middlewares.AuthorizationMiddleware(logger)(getItemEndpoint)
+	removeItemEndpoint = middlewares.AuthorizationMiddleware(logger)(removeItemEndpoint)
+
 	// Attach Authentication
 
 	addLockerEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(addLockerEndpoint)
+	addItemEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(addItemEndpoint)
+	getItemEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(getItemEndpoint)
+	removeItemEndpoint = gokitjwt.NewParser(auth.Keys, jwt.SigningMethodHS256, gokitjwt.StandardClaimsFactory)(removeItemEndpoint)
+
 	jwtOptions := []httptransport.ServerOption{
 		httptransport.ServerBefore(gokitjwt.HTTPToContext()),
 	}
@@ -60,16 +68,19 @@ func main() {
 		addItemEndpoint,
 		dto.DecodeHttpAddItemRequest,
 		dto.EncodeHttpAddItemResponse,
+		jwtOptions...,
 	)
 	getItemFromLockerHandler := httptransport.NewServer(
 		getItemEndpoint,
 		dto.DecodeHttpGetItemRequest,
 		dto.EncodeHttpGetItemResponse,
+		jwtOptions...,
 	)
 	removeFromLockerHandler := httptransport.NewServer(
 		removeItemEndpoint,
 		dto.DecodeHttpRemoveItemRequest,
 		dto.EncodeHttpRemoveItemResponse,
+		jwtOptions...,
 	)
 
 	tokenHandler := httptransport.NewServer(

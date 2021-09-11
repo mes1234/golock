@@ -29,10 +29,6 @@ func DecodeHttpAddItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
 		return nil, err
 	}
-	clientId, err := uuid.Parse(requestHttp.ClientId)
-	if err != nil {
-		return nil, err
-	}
 	lockerId, err := uuid.Parse(requestHttp.LockerId)
 	if err != nil {
 		return nil, err
@@ -45,7 +41,6 @@ func DecodeHttpAddItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	request := adapters.AddItemRequest{
-		ClientId: clientId,
 		LockerId: lockerId,
 		SecretId: locker.SecretId(secretid),
 		Content:  locker.PlainContent{Value: content},
@@ -60,10 +55,6 @@ func DecodeHttpRemoveItemRequest(_ context.Context, r *http.Request) (interface{
 	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
 		return nil, err
 	}
-	clientId, err := uuid.Parse(requestHttp.ClientId)
-	if err != nil {
-		return nil, err
-	}
 	lockerId, err := uuid.Parse(requestHttp.LockerId)
 	if err != nil {
 		return nil, err
@@ -71,7 +62,6 @@ func DecodeHttpRemoveItemRequest(_ context.Context, r *http.Request) (interface{
 	secretid := (requestHttp.SecretId)
 
 	request := adapters.RemoveItemRequest{
-		ClientId: clientId,
 		LockerId: lockerId,
 		SecretId: locker.SecretId(secretid),
 	}
@@ -85,10 +75,6 @@ func DecodeHttpGetItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
 		return nil, err
 	}
-	clientId, err := uuid.Parse(requestHttp.ClientId)
-	if err != nil {
-		return nil, err
-	}
 	lockerId, err := uuid.Parse(requestHttp.LockerId)
 	if err != nil {
 		return nil, err
@@ -96,7 +82,6 @@ func DecodeHttpGetItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	secretid := (requestHttp.SecretId)
 
 	request := adapters.GetItemRequest{
-		ClientId: clientId,
 		LockerId: lockerId,
 		SecretId: locker.SecretId(secretid),
 	}
