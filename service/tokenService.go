@@ -35,7 +35,7 @@ func (t tokenService) GetToken(
 			Token: getToken(client.ClientId),
 		}, nil
 	} else {
-		return adapters.TokenResponse{}, errors.New("Authentication error")
+		return adapters.TokenResponse{}, errors.New("authentication error")
 	}
 
 }

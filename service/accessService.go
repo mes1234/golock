@@ -23,7 +23,20 @@ func (s accessService) Add(
 	ctx context.Context,
 	reques adapters.AddItemRequest,
 ) (adapters.AddItemResponse, error) {
-	return adapters.AddItemResponse{Status: true}, nil
+
+	lockerCh := make(chan error)
+
+	go locker.GetRepository().AddItem(reques.ClientId, reques.LockerId, reques.SecretId, reques.Content, lockerCh)
+
+	err := <-lockerCh
+	var status bool
+	if err != nil {
+		status = false
+	} else {
+		status = true
+	}
+
+	return adapters.AddItemResponse{Status: status}, nil
 }
 
 // Get item from locker
@@ -53,16 +66,13 @@ func (s accessService) NewLocker(
 	request adapters.AddLockerRequest, // Identification of client
 ) (adapters.AddLockerResponse, error) {
 
-	reqCh, respCh := locker.Attach()
+	lockerCh := make(chan locker.LockerId)
 
-	// Send request to worker
-	reqCh <- request.ClientId
+	go locker.GetRepository().AddLocker(request.ClientId, lockerCh)
 
 	// Await response
-	lockerId := <-respCh
-
 	response := adapters.AddLockerResponse{
-		LockerId: lockerId,
+		LockerId: <-lockerCh,
 	}
 	return response, nil
 }

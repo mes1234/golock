@@ -18,7 +18,7 @@ type Locker struct {
 
 // Crypter allows to en/de crypt information using clients credentials
 type Crypter interface {
-	encrypt(client.ClientId, key.Value, PlainContent)        // encrypt is a function allowing to encrypt message using client identity and key
+	encrypt(client.ClientId, key.Value, PlainContent) Secret // encrypt is a function allowing to encrypt message using client identity and key
 	decrypt(client.ClientId, key.Value, Secret) PlainContent // decrypt is a function allowing to decrypt message using client identity and key
 }
 
