@@ -75,7 +75,7 @@ func (r *repository) AddItem(
 		revision = 0
 	}
 	secret := NewCrypter().encrypt(clientId, key.Value{}, content)
-	secret.Revision = revision
+	secret.Revision = revision + 1
 	r.repository[lockerId].Secrets[secretName] = secret
 
 	//
