@@ -1,36 +1,72 @@
 package locker
 
 import (
-	"github.com/google/uuid"
-	"github.com/mes1234/golock/internal/client"
-	"github.com/mes1234/golock/internal/key"
-)
+	"errors"
 
-type LockerId = uuid.UUID // Identification of Locker
+	"github.com/mes1234/golock/internal/client"
+	"github.com/mes1234/golock/internal/keys"
+)
 
 // Locker is container for all secrect
 type Locker struct {
+	crypter Crypter             // provide cryptgraphic functionality
 	Id      LockerId            // Identifier of locker
 	Client  client.ClientId     // Identifiers of all clients with access
 	Secrets map[SecretId]Secret //Content of Locker
 
 }
 
-// Crypter allows to en/de crypt information using clients credentials
-type Crypter interface {
-	encrypt(client.ClientId, key.Value, PlainContent) Secret // encrypt is a function allowing to encrypt message using client identity and key
-	decrypt(client.ClientId, key.Value, Secret) PlainContent // decrypt is a function allowing to decrypt message using client identity and key
+func (r *Locker) AddItem(
+	secretName SecretId,
+	key keys.Value,
+	content PlainContent,
+	resChan chan<- error) {
+	//
+
+	secret := r.crypter.encrypt(keys.Value{}, content)
+	r.Secrets[secretName] = secret
+
+	//
+	// Persist change
+	//	go r.persistance.AddItem(clientId, lockerId, secretName, content)
+	// return
+	resChan <- nil
 }
 
-// PlainContent is contend which client requested to be encrypted
-type PlainContent struct {
-	Value []byte
+func (r *Locker) RemoveItem(
+	secretName SecretId,
+	resChan chan<- error) {
+	//
+	if _, ok := r.Secrets[secretName]; !ok {
+		resChan <- errors.New("no item found for given secret id")
+	}
+	delete(r.Secrets, secretName)
+	//
+	// Persist change
+	//	go r.persistance.RemoveItem(clientId, lockerId, secretName)
+	// return
+	resChan <- nil
 }
 
-type SecretId string // identifier of Secret
-// Secret is single secret instance
-type Secret struct {
-	Id       uuid.UUID // Identifier of secret
-	Revision int16     // Revision for version control
-	Content  []byte    //encrypted content of secret
+func (r *Locker) GetItem(
+	lockerId LockerId,
+	key keys.Value,
+	secretName SecretId,
+	resChan chan<- struct {
+		PlainContent
+		error
+	}) {
+	// Ensure thread safety
+	//
+	if _, ok := r.Secrets[secretName]; !ok {
+		// Check persistance
+		resChan <- struct {
+			PlainContent
+			error
+		}{PlainContent{}, errors.New("no item found for given secret id")}
+	}
+	resChan <- struct {
+		PlainContent
+		error
+	}{r.crypter.decrypt(key, r.Secrets[secretName]), nil}
 }

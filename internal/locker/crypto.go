@@ -2,8 +2,7 @@ package locker
 
 import (
 	"github.com/google/uuid"
-	"github.com/mes1234/golock/internal/client"
-	"github.com/mes1234/golock/internal/key"
+	"github.com/mes1234/golock/internal/keys"
 )
 
 // Crypter allows to en/de crypt information using clients credentials
@@ -14,15 +13,14 @@ func NewCrypter() Crypter {
 }
 
 // encrypt is a function allowing to encrypt message using client identity and key
-func (c crypter) encrypt(clientId client.ClientId, key key.Value, plainContent PlainContent) Secret {
+func (c crypter) encrypt(key keys.Value, plainContent PlainContent) Secret {
 	return Secret{
-		Id:       uuid.New(),
-		Revision: 0,
-		Content:  plainContent.Value,
+		Id:      uuid.New(),
+		Content: plainContent.Value,
 	}
 }
 
 // decrypt is a function allowing to decrypt message using client identity and key
-func (c crypter) decrypt(client.ClientId, key.Value, Secret) PlainContent {
+func (c crypter) decrypt(keys.Value, Secret) PlainContent {
 	return PlainContent{}
 }

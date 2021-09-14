@@ -1,35 +1,45 @@
 package locker
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
-	"github.com/mes1234/golock/internal/key"
 )
 
-type repository struct {
-	mu          sync.Mutex
-	repository  map[LockerId]Locker
-	persistance *repository
+type memoryRepository struct {
+	r  map[LockerId]Locker
+	mu *sync.Mutex
+	c  client.ClientId
 }
 
-var memoryRepository repository
+var memRepository map[LockerId]Locker
 
 func init() {
-	memoryRepository = repository{
-		repository:  make(map[LockerId]Locker),
-		persistance: nil,
+	memRepository = make(map[LockerId]Locker)
+}
+
+func GetRepository(clientId client.ClientId) LockerRepository {
+
+	return &memoryRepository{
+		r:  memRepository,
+		mu: &sync.Mutex{},
+		c:  clientId,
 	}
 }
 
-func GetRepository() LockerRepository {
-	return &memoryRepository
+func (r *memoryRepository) UpdateLocker(locker Locker) {
+	r.r[locker.Id] = locker
 }
 
-func (r *repository) AddLocker(
-	clientId client.ClientId,
+func (r *memoryRepository) GetLocker(lockerId LockerId) Locker {
+	// Ensure thread safety
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.r[lockerId]
+}
+
+func (r *memoryRepository) AddLocker(
 	resChan chan<- LockerId) {
 	// Ensure thread safety
 	r.mu.Lock()
@@ -37,90 +47,14 @@ func (r *repository) AddLocker(
 	//
 	newLocker := Locker{
 		Id:      uuid.New(),
-		Client:  clientId,
+		Client:  r.c,
 		Secrets: map[SecretId]Secret{},
+		crypter: NewCrypter(),
 	}
-	r.repository[newLocker.Id] = newLocker
+	r.r[newLocker.Id] = newLocker
 	//
 	// Persist change
 	//	go r.persistance.AddLocker(clientId)
 	// return
 	resChan <- newLocker.Id
-}
-
-func (r *repository) AddItem(
-	clientId client.ClientId,
-	lockerId LockerId,
-	secretName SecretId,
-	content PlainContent,
-	resChan chan<- error) {
-	// Ensure thread safety
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	//
-
-	if _, ok := r.repository[lockerId]; !ok {
-		resChan <- errors.New("this locker does not exists")
-		return
-	}
-	if r.repository[lockerId].Client != clientId {
-		resChan <- errors.New("this locker does not belong to You")
-		return
-	}
-
-	var revision int16
-	if current, ok := r.repository[lockerId].Secrets[secretName]; ok {
-		revision = current.Revision
-	} else {
-		revision = 0
-	}
-	secret := NewCrypter().encrypt(clientId, key.Value{}, content)
-	secret.Revision = revision + 1
-	r.repository[lockerId].Secrets[secretName] = secret
-
-	//
-	// Persist change
-	//	go r.persistance.AddItem(clientId, lockerId, secretName, content)
-	// return
-	resChan <- nil
-}
-
-func (r *repository) RemoveItem(
-	clientId client.ClientId,
-	lockerId LockerId,
-	secretName SecretId,
-	resChan chan<- error) {
-	// Ensure thread safety
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	//
-	// DO LOGIC
-	//
-	// Persist change
-	//	go r.persistance.RemoveItem(clientId, lockerId, secretName)
-	// return
-	resChan <- nil
-}
-
-func (r *repository) GetItem(
-	clientId client.ClientId,
-	lockerId LockerId,
-	secretName SecretId,
-	resChan chan<- struct {
-		PlainContent
-		error
-	}) {
-	// Ensure thread safety
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	//
-	// DO LOGIC
-	//
-	// Persist change
-	// Do this if local stage failed r.persistance.GetItem(clientId, lockerId, secretName)
-	// return
-	resChan <- struct {
-		PlainContent
-		error
-	}{PlainContent{}, nil}
 }

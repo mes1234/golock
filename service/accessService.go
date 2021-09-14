@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/mes1234/golock/adapters"
+	"github.com/mes1234/golock/internal/keys"
 	"github.com/mes1234/golock/internal/locker"
 )
 
@@ -26,9 +27,19 @@ func (s accessService) Add(
 
 	lockerCh := make(chan error)
 
-	go locker.GetRepository().AddItem(reques.ClientId, reques.LockerId, reques.SecretId, reques.Content, lockerCh)
+	repo := locker.GetRepository(reques.ClientId)
+	locker := repo.GetLocker(reques.LockerId)
+
+	go locker.AddItem(
+		reques.SecretId,
+		keys.Value{},
+		reques.Content,
+		lockerCh)
 
 	err := <-lockerCh
+
+	repo.UpdateLocker(locker)
+
 	var status bool
 	if err != nil {
 		status = false
@@ -68,7 +79,7 @@ func (s accessService) NewLocker(
 
 	lockerCh := make(chan locker.LockerId)
 
-	go locker.GetRepository().AddLocker(request.ClientId, lockerCh)
+	go locker.GetRepository(request.ClientId).AddLocker(lockerCh)
 
 	// Await response
 	response := adapters.AddLockerResponse{
