@@ -6,6 +6,12 @@ import (
 )
 
 // Crypter allows to en/de crypt information using clients credentials
+type Crypter interface {
+	encrypt(keys.Value, PlainContent) Secret // encrypt is a function allowing to encrypt message using client identity and key
+	decrypt(keys.Value, Secret) PlainContent // decrypt is a function allowing to decrypt message using client identity and key
+}
+
+// Crypter allows to en/de crypt information using clients credentials
 type crypter struct{}
 
 func NewCrypter() Crypter {

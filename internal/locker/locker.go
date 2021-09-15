@@ -9,13 +9,14 @@ import (
 
 // Locker is container for all secrect
 type Locker struct {
-	crypter Crypter             // provide cryptgraphic functionality
+	Crypter Crypter             // provide cryptgraphic functionality
 	Id      LockerId            // Identifier of locker
 	Client  client.ClientId     // Identifiers of all clients with access
 	Secrets map[SecretId]Secret //Content of Locker
 
 }
 
+// Add item to locker
 func (r *Locker) AddItem(
 	secretName SecretId,
 	key keys.Value,
@@ -23,7 +24,7 @@ func (r *Locker) AddItem(
 	resChan chan<- error) {
 	//
 
-	secret := r.crypter.encrypt(keys.Value{}, content)
+	secret := r.Crypter.encrypt(keys.Value{}, content)
 	r.Secrets[secretName] = secret
 
 	//
@@ -33,6 +34,7 @@ func (r *Locker) AddItem(
 	resChan <- nil
 }
 
+// Remove item from locker
 func (r *Locker) RemoveItem(
 	secretName SecretId,
 	resChan chan<- error) {
@@ -48,25 +50,17 @@ func (r *Locker) RemoveItem(
 	resChan <- nil
 }
 
+// Get item from locker
 func (r *Locker) GetItem(
-	lockerId LockerId,
 	key keys.Value,
 	secretName SecretId,
-	resChan chan<- struct {
-		PlainContent
-		error
-	}) {
+	resChan chan<- PlainContent) {
 	// Ensure thread safety
 	//
 	if _, ok := r.Secrets[secretName]; !ok {
 		// Check persistance
-		resChan <- struct {
-			PlainContent
-			error
-		}{PlainContent{}, errors.New("no item found for given secret id")}
+		close(resChan)
+		return
 	}
-	resChan <- struct {
-		PlainContent
-		error
-	}{r.crypter.decrypt(key, r.Secrets[secretName]), nil}
+	resChan <- r.Crypter.decrypt(key, r.Secrets[secretName])
 }

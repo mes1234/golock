@@ -25,20 +25,23 @@ func (s accessService) Add(
 	reques adapters.AddItemRequest,
 ) (adapters.AddItemResponse, error) {
 
-	lockerCh := make(chan error)
+	lockerCh := make(chan locker.Locker)
+	errCh := make(chan error)
 
 	repo := locker.GetRepository(reques.ClientId)
-	locker := repo.GetLocker(reques.LockerId)
+	go repo.GetLocker(reques.LockerId, lockerCh)
 
-	go locker.AddItem(
+	l := <-lockerCh
+
+	go l.AddItem(
 		reques.SecretId,
 		keys.Value{},
 		reques.Content,
-		lockerCh)
+		errCh)
 
-	err := <-lockerCh
+	err := <-errCh
 
-	repo.UpdateLocker(locker)
+	go repo.UpdateLocker(l)
 
 	var status bool
 	if err != nil {
@@ -79,7 +82,7 @@ func (s accessService) NewLocker(
 
 	lockerCh := make(chan locker.LockerId)
 
-	go locker.GetRepository(request.ClientId).AddLocker(lockerCh)
+	go locker.GetRepository(request.ClientId).InitLocker(lockerCh)
 
 	// Await response
 	response := adapters.AddLockerResponse{

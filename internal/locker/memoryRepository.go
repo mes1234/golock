@@ -7,6 +7,17 @@ import (
 	"github.com/mes1234/golock/internal/client"
 )
 
+type LockerRepository interface {
+	// Create locker for given client
+	InitLocker(resChan chan<- LockerId)
+
+	// Update locker in repository
+	UpdateLocker(locker Locker)
+
+	// Retrieve locker
+	GetLocker(LockerId, chan<- Locker)
+}
+
 type memoryRepository struct {
 	r  map[LockerId]Locker
 	mu *sync.Mutex
@@ -32,25 +43,32 @@ func (r *memoryRepository) UpdateLocker(locker Locker) {
 	r.r[locker.Id] = locker
 }
 
-func (r *memoryRepository) GetLocker(lockerId LockerId) Locker {
+func (r *memoryRepository) GetLocker(lockerId LockerId, resChan chan<- Locker) {
 	// Ensure thread safety
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.r[lockerId]
+
+	if l, ok := r.r[lockerId]; ok {
+		resChan <- l
+	} else {
+		close(resChan)
+	}
+
 }
 
-func (r *memoryRepository) AddLocker(
-	resChan chan<- LockerId) {
+func (r *memoryRepository) InitLocker(resChan chan<- LockerId) {
+
 	// Ensure thread safety
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	//
+
 	newLocker := Locker{
 		Id:      uuid.New(),
 		Client:  r.c,
 		Secrets: map[SecretId]Secret{},
-		crypter: NewCrypter(),
+		Crypter: NewCrypter(),
 	}
+
 	r.r[newLocker.Id] = newLocker
 	//
 	// Persist change
