@@ -58,9 +58,6 @@ func (r *memoryRepository) InitLocker(lockerId LockerId, resChan chan<- LockerId
 	}
 
 	r.r[newLocker.Id] = newLocker
-	//
-	// Persist change
-	//	go r.persistance.AddLocker(clientId)
-	// return
+
 	resChan <- newLocker.Id
 }
