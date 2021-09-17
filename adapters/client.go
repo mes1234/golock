@@ -3,26 +3,26 @@ package adapters
 import "github.com/google/uuid"
 
 type ClientAssigner interface {
-	AssignClient(string) interface{}
+	AssignClient(uuid.UUID) interface{}
 }
 
-func (msg AddLockerRequest) AssignClient(clientName string) interface{} {
-	msg.ClientName = clientName
+func (msg AddLockerRequest) AssignClient(clientId uuid.UUID) interface{} {
+	msg.ClientId = clientId
 	return msg
 }
 
-func (msg AddItemRequest) AssignClient(clientName string) interface{} {
-	msg.ClientName = clientName
+func (msg AddItemRequest) AssignClient(clientId uuid.UUID) interface{} {
+	msg.ClientId = clientId
 	return msg
 }
 
-func (msg GetItemRequest) AssignClient(clientName string) interface{} {
-	msg.ClientName = clientName
+func (msg GetItemRequest) AssignClient(clientId uuid.UUID) interface{} {
+	msg.ClientId = clientId
 	return msg
 }
 
-func (msg RemoveItemRequest) AssignClient(clientName string) interface{} {
-	msg.ClientName = clientName
+func (msg RemoveItemRequest) AssignClient(clientId uuid.UUID) interface{} {
+	msg.ClientId = clientId
 	return msg
 }
 

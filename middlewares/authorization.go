@@ -31,7 +31,7 @@ func AuthorizationMiddleware(logger log.Logger) endpoint.Middleware {
 
 			repository.Retrieve(&client)
 
-			request = genericRequest.AssignClient(client.ClientName)
+			request = genericRequest.AssignClient(client.ClientId)
 
 			logger := log.With(logger, "method", "Add")
 			logger.Log("Successfully authorized user {user}", client.ClientName)

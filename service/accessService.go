@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/log"
-	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
+	"github.com/mes1234/golock/internal/keys"
 	"github.com/mes1234/golock/internal/locker"
 )
 
@@ -24,7 +24,33 @@ func (s accessService) Add(
 	ctx context.Context,
 	reques adapters.AddItemRequest,
 ) (adapters.AddItemResponse, error) {
-	return adapters.AddItemResponse{Status: true}, nil
+
+	lockerCh := make(chan locker.Locker)
+	errCh := make(chan error)
+
+	repo := locker.GetRepository(reques.ClientId)
+	go repo.GetLocker(reques.LockerId, lockerCh)
+
+	l := <-lockerCh
+
+	go l.AddItem(
+		reques.SecretId,
+		keys.Value{},
+		reques.Content,
+		errCh)
+
+	err := <-errCh
+
+	go repo.UpdateLocker(l)
+
+	var status bool
+	if err != nil {
+		status = false
+	} else {
+		status = true
+	}
+
+	return adapters.AddItemResponse{Status: status}, nil
 }
 
 // Get item from locker
@@ -54,8 +80,13 @@ func (s accessService) NewLocker(
 	request adapters.AddLockerRequest, // Identification of client
 ) (adapters.AddLockerResponse, error) {
 
+	lockerCh := make(chan locker.LockerId)
+
+	go locker.GetRepository(request.ClientId).InitLocker(lockerCh)
+
+	// Await response
 	response := adapters.AddLockerResponse{
-		LockerId: uuid.New(),
+		LockerId: <-lockerCh,
 	}
 	return response, nil
 }
