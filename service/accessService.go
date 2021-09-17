@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/log"
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
 	"github.com/mes1234/golock/internal/keys"
 	"github.com/mes1234/golock/internal/locker"
@@ -82,7 +83,7 @@ func (s accessService) NewLocker(
 
 	lockerCh := make(chan locker.LockerId)
 
-	go locker.GetRepository(request.ClientId).InitLocker(lockerCh)
+	go locker.GetRepository(request.ClientId).InitLocker(uuid.New(), lockerCh)
 
 	// Await response
 	response := adapters.AddLockerResponse{
