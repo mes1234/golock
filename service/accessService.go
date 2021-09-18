@@ -32,7 +32,11 @@ func (s accessService) Add(
 	repo := locker.GetRepository(reques.ClientId)
 	go repo.GetLocker(reques.LockerId, lockerCh)
 
-	l := <-lockerCh
+	l, ok := <-lockerCh
+
+	if !ok {
+		return adapters.AddItemResponse{Status: false}, nil
+	}
 
 	go l.AddItem(
 		reques.SecretId,

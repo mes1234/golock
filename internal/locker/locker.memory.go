@@ -3,7 +3,6 @@ package locker
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/keys"
 )
@@ -17,9 +16,9 @@ type memoryLocker struct {
 
 }
 
-func GetMemoryLocker(clientId client.ClientId) Locker {
+func GetMemoryLocker(clientId client.ClientId, lockerId LockerId) Locker {
 	return &memoryLocker{
-		Id:      uuid.New(),
+		Id:      lockerId,
 		Client:  clientId,
 		Secrets: map[SecretId]Secret{},
 		Crypter: NewCrypter(),

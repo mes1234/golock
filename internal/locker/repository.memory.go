@@ -49,7 +49,7 @@ func (r *memoryRepository) InitLocker(lockerId LockerId, resChan chan<- LockerId
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	newLocker := GetMemoryLocker(r.c)
+	newLocker := GetMemoryLocker(r.c, lockerId)
 
 	r.r[newLocker.GetId()] = newLocker
 
