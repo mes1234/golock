@@ -6,6 +6,7 @@ import (
 
 type Locker interface {
 	GetId() LockerId
+	IncreaseRevision()
 
 	// Add item to locker
 	AddItem(

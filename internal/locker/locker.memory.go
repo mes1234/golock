@@ -9,24 +9,30 @@ import (
 
 // Locker is container for all secrect
 type memoryLocker struct {
-	Crypter Crypter             // provide cryptgraphic functionality
-	Id      LockerId            // Identifier of locker
-	Client  client.ClientId     // Identifiers of all clients with access
-	Secrets map[SecretId]Secret //Content of Locker
+	Crypter  Crypter             // provide cryptgraphic functionality
+	Revision int                 // revision of current locker
+	Id       LockerId            // Identifier of locker
+	Client   client.ClientId     // Identifiers of all clients with access
+	Secrets  map[SecretId]Secret //Content of Locker
 
 }
 
 func GetMemoryLocker(clientId client.ClientId, lockerId LockerId) Locker {
 	return &memoryLocker{
-		Id:      lockerId,
-		Client:  clientId,
-		Secrets: map[SecretId]Secret{},
-		Crypter: NewCrypter(),
+		Id:       lockerId,
+		Revision: 1,
+		Client:   clientId,
+		Secrets:  map[SecretId]Secret{},
+		Crypter:  NewCrypter(),
 	}
 }
 
 func (r *memoryLocker) GetId() LockerId {
 	return r.Id
+}
+
+func (r *memoryLocker) IncreaseRevision() {
+	r.Revision = r.Revision + 1
 }
 
 // Add item to locker
@@ -35,15 +41,12 @@ func (r *memoryLocker) AddItem(
 	key keys.Value,
 	content PlainContent,
 	resChan chan<- error) {
-	//
 
 	secret := r.Crypter.encrypt(keys.Value{}, content)
+	secret.Revision = r.Revision
+	secret.Active = true
 	r.Secrets[secretName] = secret
 
-	//
-	// Persist change
-	//	go r.persistance.AddItem(clientId, lockerId, secretName, content)
-	// return
 	resChan <- nil
 }
 
@@ -55,11 +58,13 @@ func (r *memoryLocker) RemoveItem(
 	if _, ok := r.Secrets[secretName]; !ok {
 		resChan <- errors.New("no item found for given secret id")
 	}
-	delete(r.Secrets, secretName)
-	//
-	// Persist change
-	//	go r.persistance.RemoveItem(clientId, lockerId, secretName)
-	// return
+	if !r.Secrets[secretName].Active {
+		resChan <- errors.New("item already removed")
+	}
+	item := r.Secrets[secretName]
+	item.Active = false
+	r.Secrets[secretName] = item
+
 	resChan <- nil
 }
 
@@ -71,7 +76,10 @@ func (r *memoryLocker) GetItem(
 	// Ensure thread safety
 	//
 	if _, ok := r.Secrets[secretName]; !ok {
-		// Check persistance
+		close(resChan)
+		return
+	}
+	if !r.Secrets[secretName].Active {
 		close(resChan)
 		return
 	}

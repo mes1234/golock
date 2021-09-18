@@ -28,6 +28,7 @@ func (r *repositoryRouter) GetLocker(lockerId LockerId, resChan chan<- Locker) {
 		go v.GetLocker(lockerId, lockerCh)
 		res, ok := <-lockerCh
 		if ok {
+			res.IncreaseRevision()
 			resChan <- res
 			break
 		}

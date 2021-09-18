@@ -14,6 +14,8 @@ type PlainContent struct {
 type SecretId string // identifier of Secret
 // Secret is single secret instance
 type Secret struct {
-	Id      uuid.UUID // Identifier of secret
-	Content []byte    //encrypted content of secret
+	Id       uuid.UUID // Identifier of secret
+	Revision int       // Revision of locker when it was modified
+	Active   bool      // Flag to indicate soft delete
+	Content  []byte    //encrypted content of secret
 }

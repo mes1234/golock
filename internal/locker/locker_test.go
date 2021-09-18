@@ -9,7 +9,7 @@ import (
 )
 
 func createLocker() locker.Locker {
-	return locker.GetMemoryLocker(uuid.New())
+	return locker.GetMemoryLocker(uuid.New(), uuid.New())
 }
 
 func TestAddingItemToLocker(t *testing.T) {
