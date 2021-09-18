@@ -1,6 +1,10 @@
 package locker
 
-import "github.com/mes1234/golock/internal/client"
+import (
+	"log"
+
+	"github.com/mes1234/golock/internal/client"
+)
 
 type dbRepository struct {
 }
@@ -11,7 +15,7 @@ func getDbRepository(clientId client.ClientId) LockerRepository {
 }
 
 func (r *dbRepository) UpdateLocker(locker Locker) {
-
+	log.Print("update to db")
 }
 
 func (r *dbRepository) GetLocker(lockerId LockerId, resChan chan<- Locker) {
