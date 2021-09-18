@@ -9,12 +9,7 @@ import (
 )
 
 func createLocker() locker.Locker {
-	return locker.Locker{
-		Id:      uuid.New(),
-		Client:  uuid.New(),
-		Secrets: make(map[locker.SecretId]locker.Secret),
-		Crypter: locker.NewCrypter(),
-	}
+	return locker.GetMemoryLocker(uuid.New())
 }
 
 func TestAddingItemToLocker(t *testing.T) {

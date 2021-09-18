@@ -3,7 +3,6 @@ package locker
 import (
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
 )
 
@@ -29,7 +28,7 @@ func getMemoryRepository(clientId client.ClientId) LockerRepository {
 }
 
 func (r *memoryRepository) UpdateLocker(locker Locker) {
-	r.r[locker.Id] = locker
+	r.r[locker.GetId()] = locker
 }
 
 func (r *memoryRepository) GetLocker(lockerId LockerId, resChan chan<- Locker) {
@@ -50,14 +49,9 @@ func (r *memoryRepository) InitLocker(lockerId LockerId, resChan chan<- LockerId
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	newLocker := Locker{
-		Id:      uuid.New(),
-		Client:  r.c,
-		Secrets: map[SecretId]Secret{},
-		Crypter: NewCrypter(),
-	}
+	newLocker := GetMemoryLocker(r.c)
 
-	r.r[newLocker.Id] = newLocker
+	r.r[newLocker.GetId()] = newLocker
 
-	resChan <- newLocker.Id
+	resChan <- newLocker.GetId()
 }
