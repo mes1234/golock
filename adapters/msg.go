@@ -1,26 +1,25 @@
 package adapters
 
 import (
-	"github.com/mes1234/golock/internal/client"
-	"github.com/mes1234/golock/internal/locker"
+	"github.com/google/uuid"
 )
 
 // Domain internal add locker request
 type AddLockerRequest struct {
-	ClientId client.ClientId
+	ClientId uuid.UUID
 }
 
 // Domain internal add locker response
 type AddLockerResponse struct {
-	LockerId locker.LockerId
+	LockerId uuid.UUID
 }
 
 // Domain internal add item request
 type AddItemRequest struct {
-	ClientId client.ClientId
-	LockerId locker.LockerId     // Identification of locker to insert into
-	SecretId locker.SecretId     // Identification of secret to get
-	Content  locker.PlainContent // Content which shall be injected
+	ClientId uuid.UUID
+	LockerId uuid.UUID // Identification of locker to insert into
+	SecretId string    // Identification of secret to get
+	Content  []byte    // Content which shall be injected
 }
 
 // Domain internal add item response
@@ -29,9 +28,9 @@ type AddItemResponse struct {
 }
 
 type RemoveItemRequest struct {
-	ClientId client.ClientId
-	LockerId locker.LockerId // Identification of locker to insert into
-	SecretId locker.SecretId // Identification of secret to get
+	ClientId uuid.UUID
+	LockerId uuid.UUID // Identification of locker to insert into
+	SecretId string    // Identification of secret to get
 }
 
 type RemoveItemResponse struct {
@@ -39,13 +38,13 @@ type RemoveItemResponse struct {
 }
 
 type GetItemRequest struct {
-	ClientId client.ClientId
-	LockerId locker.LockerId // Identification of locker to insert into
-	SecretId locker.SecretId // Identification of secret to get
+	ClientId uuid.UUID
+	LockerId uuid.UUID // Identification of locker to insert into
+	SecretId string    // Identification of secret to get
 }
 
 type GetItemResponse struct {
-	Content locker.PlainContent // Content which shall responded
+	Content []byte // Content which shall responded
 }
 
 type TokenRequest struct {

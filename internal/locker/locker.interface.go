@@ -1,28 +1,31 @@
 package locker
 
 import (
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/keys"
 )
 
 type Locker interface {
-	GetId() LockerId
 	IncreaseRevision()
+	GetId() uuid.UUID
+	GetClientId() uuid.UUID
+	ItemsToCommit() map[string]Secret
 
 	// Add item to locker
 	AddItem(
-		secretName SecretId,
+		secretName string,
 		key keys.Value,
-		content PlainContent,
+		content []byte,
 		resChan chan<- error)
 
 	// Remove item from locker
 	RemoveItem(
-		secretName SecretId,
+		secretName string,
 		resChan chan<- error)
 
 	// Get item from locker
 	GetItem(
 		key keys.Value,
-		secretName SecretId,
-		resChan chan<- PlainContent)
+		secretName string,
+		resChan chan<- []byte)
 }

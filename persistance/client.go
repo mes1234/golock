@@ -1,14 +1,11 @@
 package persistance
 
 import (
-	"context"
 	"log"
-	"time"
 
 	"github.com/mes1234/golock/adapters"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var client *mongo.Client
@@ -26,7 +23,7 @@ func NewClientRepository() ClientRepository {
 
 func (cr clientRepository) Insert(clientDetails *adapters.Client) (err error) {
 
-	collection, ctx := getDbCollection()
+	collection, ctx := getDbCollection("clients", "clients")
 
 	document, err := convertToMongoDocument(clientDetails)
 	if err != nil {
@@ -42,7 +39,7 @@ func (cr clientRepository) Insert(clientDetails *adapters.Client) (err error) {
 
 func (cr clientRepository) Retrieve(clientDetails *adapters.Client) (err error) {
 
-	collection, ctx := getDbCollection()
+	collection, ctx := getDbCollection("clients", "clients")
 
 	var data interface{}
 
@@ -70,35 +67,5 @@ func (cr clientRepository) Retrieve(clientDetails *adapters.Client) (err error) 
 	collection.Database().Client().Disconnect(ctx)
 
 	err = nil
-	return
-}
-
-// Retrieve collection to operate
-func getDbCollection() (collection *mongo.Collection, ctx context.Context) {
-	var err error
-	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:example@localhost:27017/"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	collection = client.Database("clients").Collection("clients")
-
-	return
-
-}
-
-// convert any object to mongo document
-func convertToMongoDocument(v interface{}) (doc *bson.D, err error) {
-	data, err := bson.Marshal(v)
-	if err != nil {
-		return
-	}
-	err = bson.Unmarshal(data, &doc)
 	return
 }

@@ -46,7 +46,7 @@ func (s accessService) Add(
 
 	err := <-errCh
 
-	go repo.UpdateLocker(l)
+	go repo.UpdateLocker(l, make(chan<- bool))
 
 	var status bool
 	if err != nil {
@@ -64,14 +64,11 @@ func (s accessService) Get(
 	request adapters.GetItemRequest,
 ) (adapters.GetItemResponse, error) {
 	return adapters.GetItemResponse{
-		Content: locker.PlainContent{
-			Value: []byte("hello"),
-		}}, nil
+		Content: make([]byte, 0)}, nil
 }
 
 // Remove item from locker
-func (s accessService) Remove(
-	ctx context.Context,
+func (s accessService) Remove(ctx context.Context,
 	request adapters.RemoveItemRequest,
 ) (adapters.RemoveItemResponse, error) {
 	return adapters.RemoveItemResponse{
@@ -85,7 +82,7 @@ func (s accessService) NewLocker(
 	request adapters.AddLockerRequest, // Identification of client
 ) (adapters.AddLockerResponse, error) {
 
-	lockerCh := make(chan locker.LockerId)
+	lockerCh := make(chan uuid.UUID)
 
 	go locker.GetRepository(request.ClientId).InitLocker(uuid.New(), lockerCh)
 

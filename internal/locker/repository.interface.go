@@ -1,12 +1,14 @@
 package locker
 
+import "github.com/google/uuid"
+
 type LockerRepository interface {
 	// Create locker for given client
-	InitLocker(lockerId LockerId, resChan chan<- LockerId)
+	InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID)
 
 	// Update locker in repository
-	UpdateLocker(locker Locker)
+	UpdateLocker(l Locker, resChan chan<- bool)
 
 	// Retrieve locker
-	GetLocker(LockerId, chan<- Locker)
+	GetLocker(lockerId uuid.UUID, resChan chan<- Locker)
 }

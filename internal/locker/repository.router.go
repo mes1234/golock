@@ -1,6 +1,9 @@
 package locker
 
-import "github.com/mes1234/golock/internal/client"
+import (
+	"github.com/google/uuid"
+	"github.com/mes1234/golock/internal/client"
+)
 
 type repositoryRouter struct {
 	repositories []LockerRepository
@@ -14,14 +17,15 @@ func GetRepository(clientId client.ClientId) LockerRepository {
 	return &repo
 }
 
-func (r *repositoryRouter) UpdateLocker(locker Locker) {
+func (r *repositoryRouter) UpdateLocker(locker Locker, resChan chan<- bool) {
 	for _, v := range r.repositories {
-		go v.UpdateLocker(locker)
+		go v.UpdateLocker(locker, make(chan<- bool))
 	}
+	resChan <- true
 
 }
 
-func (r *repositoryRouter) GetLocker(lockerId LockerId, resChan chan<- Locker) {
+func (r *repositoryRouter) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
 
 	for _, v := range r.repositories {
 		lockerCh := make(chan Locker)
@@ -36,9 +40,9 @@ func (r *repositoryRouter) GetLocker(lockerId LockerId, resChan chan<- Locker) {
 	close(resChan)
 }
 
-func (r *repositoryRouter) InitLocker(lockerId LockerId, resChan chan<- LockerId) {
+func (r *repositoryRouter) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 	for _, v := range r.repositories {
-		lockerCh := make(chan LockerId)
+		lockerCh := make(chan uuid.UUID)
 		go v.InitLocker(lockerId, lockerCh)
 		res, ok := <-lockerCh
 		if !ok {

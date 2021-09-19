@@ -3,19 +3,20 @@ package locker
 import (
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
 )
 
 type memoryRepository struct {
-	r  map[LockerId]Locker
+	r  map[uuid.UUID]Locker
 	mu *sync.Mutex
 	c  client.ClientId
 }
 
-var memRepository map[LockerId]Locker
+var memRepository map[uuid.UUID]Locker
 
 func init() {
-	memRepository = make(map[LockerId]Locker)
+	memRepository = make(map[uuid.UUID]Locker)
 }
 
 func getMemoryRepository(clientId client.ClientId) LockerRepository {
@@ -27,11 +28,12 @@ func getMemoryRepository(clientId client.ClientId) LockerRepository {
 	}
 }
 
-func (r *memoryRepository) UpdateLocker(locker Locker) {
+func (r *memoryRepository) UpdateLocker(locker Locker, resChan chan<- bool) {
 	r.r[locker.GetId()] = locker
+	resChan <- true
 }
 
-func (r *memoryRepository) GetLocker(lockerId LockerId, resChan chan<- Locker) {
+func (r *memoryRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
 	// Ensure thread safety
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -43,7 +45,7 @@ func (r *memoryRepository) GetLocker(lockerId LockerId, resChan chan<- Locker) {
 	}
 }
 
-func (r *memoryRepository) InitLocker(lockerId LockerId, resChan chan<- LockerId) {
+func (r *memoryRepository) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 
 	// Ensure thread safety
 	r.mu.Lock()

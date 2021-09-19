@@ -7,8 +7,8 @@ import (
 
 // Crypter allows to en/de crypt information using clients credentials
 type Crypter interface {
-	encrypt(keys.Value, PlainContent) Secret // encrypt is a function allowing to encrypt message using client identity and key
-	decrypt(keys.Value, Secret) PlainContent // decrypt is a function allowing to decrypt message using client identity and key
+	encrypt(keys.Value, []byte) Secret // encrypt is a function allowing to encrypt message using client identity and key
+	decrypt(keys.Value, Secret) []byte // decrypt is a function allowing to decrypt message using client identity and key
 }
 
 // Crypter allows to en/de crypt information using clients credentials
@@ -19,14 +19,14 @@ func NewCrypter() Crypter {
 }
 
 // encrypt is a function allowing to encrypt message using client identity and key
-func (c crypter) encrypt(key keys.Value, plainContent PlainContent) Secret {
+func (c crypter) encrypt(key keys.Value, plainContent []byte) Secret {
 	return Secret{
 		Id:      uuid.New(),
-		Content: plainContent.Value,
+		Content: plainContent,
 	}
 }
 
 // decrypt is a function allowing to decrypt message using client identity and key
-func (c crypter) decrypt(keys.Value, Secret) PlainContent {
-	return PlainContent{}
+func (c crypter) decrypt(keys.Value, Secret) []byte {
+	return make([]byte, 0)
 }

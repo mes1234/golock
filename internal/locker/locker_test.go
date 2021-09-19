@@ -14,9 +14,7 @@ func createLocker() locker.Locker {
 
 func TestAddingItemToLocker(t *testing.T) {
 	l := createLocker()
-	content := locker.PlainContent{
-		Value: []byte{0x01},
-	}
+	content := []byte{0x01}
 
 	resChan := make(chan error)
 
@@ -30,9 +28,7 @@ func TestAddingItemToLocker(t *testing.T) {
 
 func TestGetItemFromLocker(t *testing.T) {
 	l := createLocker()
-	content := locker.PlainContent{
-		Value: []byte{0x01},
-	}
+	content := []byte{0x01}
 
 	resChan := make(chan error)
 
@@ -42,12 +38,12 @@ func TestGetItemFromLocker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error during adding item to locker: %v", err)
 	}
-	resChanGet := make(chan locker.PlainContent)
+	resChanGet := make(chan []byte)
 
 	go l.GetItem(keys.Value{}, "dummy", resChanGet)
 	res := <-resChanGet
-	for i, s := range res.Value {
-		if s != content.Value[i] {
+	for i, s := range res {
+		if s != content[i] {
 			t.Fatalf("Value restored is not the same as saved in locker")
 		}
 	}
@@ -55,9 +51,7 @@ func TestGetItemFromLocker(t *testing.T) {
 
 func TestGetItemFailedLocker(t *testing.T) {
 	l := createLocker()
-	content := locker.PlainContent{
-		Value: []byte{0x01},
-	}
+	content := []byte{0x01}
 
 	resChan := make(chan error)
 
@@ -67,7 +61,7 @@ func TestGetItemFailedLocker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error during adding item to locker: %v", err)
 	}
-	resChanGet := make(chan locker.PlainContent)
+	resChanGet := make(chan []byte)
 
 	go l.GetItem(keys.Value{}, "dummy2", resChanGet)
 
@@ -82,9 +76,7 @@ func TestGetItemFailedLocker(t *testing.T) {
 
 func TestRemoveItemFailedGettingLocker(t *testing.T) {
 	l := createLocker()
-	content := locker.PlainContent{
-		Value: []byte{0x01},
-	}
+	content := []byte{0x01}
 
 	resChan := make(chan error)
 
@@ -94,7 +86,7 @@ func TestRemoveItemFailedGettingLocker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error during removing item from locker: %v", err)
 	}
-	resChanGet := make(chan locker.PlainContent)
+	resChanGet := make(chan []byte)
 
 	go l.RemoveItem("dummy", resChan)
 	err = <-resChan
