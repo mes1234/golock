@@ -28,8 +28,8 @@ func getMemoryRepository(clientId client.ClientId) LockerRepository {
 	}
 }
 
-func (r *memoryRepository) UpdateLocker(locker Locker, resChan chan<- bool) {
-	r.r[locker.GetId()] = locker
+func (r *memoryRepository) UpdateLocker(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
+	r.r[lockerId] = locker
 	resChan <- true
 }
 
@@ -53,7 +53,7 @@ func (r *memoryRepository) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UU
 
 	newLocker := GetMemoryLocker(r.c, lockerId)
 
-	r.r[newLocker.GetId()] = newLocker
+	r.r[lockerId] = newLocker
 
-	resChan <- newLocker.GetId()
+	resChan <- lockerId
 }

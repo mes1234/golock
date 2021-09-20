@@ -46,7 +46,7 @@ func (s accessService) Add(
 
 	err := <-errCh
 
-	go repo.UpdateLocker(l, make(chan<- bool))
+	go repo.UpdateLocker(l, reques.LockerId, make(chan<- bool))
 
 	var status bool
 	if err != nil {

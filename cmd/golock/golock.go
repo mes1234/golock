@@ -91,11 +91,11 @@ func main() {
 
 	// Expose HTTP endpoints
 	{
-		http.Handle("/addlocker", addLockerHandler)
-		http.Handle("/add", addItemToLockerHandler)
-		http.Handle("/get", getItemFromLockerHandler)
-		http.Handle("/remove", removeFromLockerHandler)
-		http.Handle("/token", tokenHandler)
+		http.Handle("/addlocker", middlewares.AccessControl(addLockerHandler))
+		http.Handle("/add", middlewares.AccessControl(addItemToLockerHandler))
+		http.Handle("/get", middlewares.AccessControl(getItemFromLockerHandler))
+		http.Handle("/remove", middlewares.AccessControl(removeFromLockerHandler))
+		http.Handle("/token", middlewares.AccessControl(tokenHandler))
 	}
 
 	// Expose metrics

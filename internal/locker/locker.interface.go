@@ -7,7 +7,6 @@ import (
 
 type Locker interface {
 	IncreaseRevision()
-	GetId() uuid.UUID
 	GetClientId() uuid.UUID
 	ItemsToCommit() map[string]Secret
 

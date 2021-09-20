@@ -35,7 +35,6 @@ func (r *memoryLocker) ItemsToCommit() map[string]Secret {
 			items[k] = v
 		}
 	}
-
 	return items
 }
 

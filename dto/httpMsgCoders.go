@@ -12,10 +12,6 @@ import (
 
 // Decode Http inbound message to domain accepted message
 func DecodeHttpAddLockerRequest(ctx context.Context, r *http.Request) (interface{}, error) {
-	var requestHttp AddLockerHttpInboundDto
-	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
-		return nil, err
-	}
 
 	request := adapters.AddLockerRequest{}
 

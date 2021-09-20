@@ -17,9 +17,9 @@ func GetRepository(clientId client.ClientId) LockerRepository {
 	return &repo
 }
 
-func (r *repositoryRouter) UpdateLocker(locker Locker, resChan chan<- bool) {
+func (r *repositoryRouter) UpdateLocker(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	for _, v := range r.repositories {
-		go v.UpdateLocker(locker, make(chan<- bool))
+		go v.UpdateLocker(locker, lockerId, make(chan<- bool))
 	}
 	resChan <- true
 

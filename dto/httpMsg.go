@@ -11,7 +11,6 @@ type AddLockerHttpOutboundDto struct {
 
 // Http accepted representation of add item request
 type AddItemHttpInboundDto struct {
-	ClientId string `json:"clientid"`
 	LockerId string `json:"lockerid"`
 	SecretId string `json:"secretid"`
 	Content  string `json:"content"`

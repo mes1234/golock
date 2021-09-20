@@ -7,7 +7,7 @@ type LockerRepository interface {
 	InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID)
 
 	// Update locker in repository
-	UpdateLocker(l Locker, resChan chan<- bool)
+	UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<- bool)
 
 	// Retrieve locker
 	GetLocker(lockerId uuid.UUID, resChan chan<- Locker)

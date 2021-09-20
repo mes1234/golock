@@ -16,7 +16,7 @@ func getDbRepository(clientId client.ClientId) LockerRepository {
 	return &dbRepository{}
 }
 
-func (r *dbRepository) UpdateLocker(l Locker, resChan chan<- bool) {
+func (r *dbRepository) UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	log.Print("update to db")
 
 	dbAccess := persistance.NewSecretRepository()
@@ -29,7 +29,7 @@ func (r *dbRepository) UpdateLocker(l Locker, resChan chan<- bool) {
 			Revision:   v.Revision,
 			Content:    v.Content,
 			SecretName: k,
-			LockerId:   l.GetId(),
+			LockerId:   lockerId,
 			ClientId:   l.GetClientId(),
 		}
 		dbAccess.Insert(&itemToPersisit)
