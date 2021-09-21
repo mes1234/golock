@@ -8,15 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
-	"github.com/mes1234/golock/internal/locker"
 )
 
 // Decode Http inbound message to domain accepted message
 func DecodeHttpAddLockerRequest(ctx context.Context, r *http.Request) (interface{}, error) {
-	var requestHttp AddLockerHttpInboundDto
-	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
-		return nil, err
-	}
 
 	request := adapters.AddLockerRequest{}
 
@@ -42,8 +37,8 @@ func DecodeHttpAddItemRequest(_ context.Context, r *http.Request) (interface{}, 
 
 	request := adapters.AddItemRequest{
 		LockerId: lockerId,
-		SecretId: locker.SecretId(secretid),
-		Content:  locker.PlainContent{Value: content},
+		SecretId: secretid,
+		Content:  content,
 	}
 
 	return request, nil
@@ -63,7 +58,7 @@ func DecodeHttpRemoveItemRequest(_ context.Context, r *http.Request) (interface{
 
 	request := adapters.RemoveItemRequest{
 		LockerId: lockerId,
-		SecretId: locker.SecretId(secretid),
+		SecretId: secretid,
 	}
 
 	return request, nil
@@ -83,7 +78,7 @@ func DecodeHttpGetItemRequest(_ context.Context, r *http.Request) (interface{}, 
 
 	request := adapters.GetItemRequest{
 		LockerId: lockerId,
-		SecretId: locker.SecretId(secretid),
+		SecretId: secretid,
 	}
 
 	return request, nil
@@ -151,7 +146,7 @@ func EncodeHttpGetItemResponse(_ context.Context, w http.ResponseWriter, respons
 	domainResponse := response.(adapters.GetItemResponse)
 
 	responseHttp := GetItemHttpOutboundDto{
-		Content: base64.RawStdEncoding.EncodeToString(domainResponse.Content.Value),
+		Content: base64.RawStdEncoding.EncodeToString(domainResponse.Content),
 	}
 
 	json.NewEncoder(w).Encode(responseHttp)

@@ -1,0 +1,109 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Locker
+  license:
+    name: MIT
+servers:
+  - url: http://127.0.0.1:8080/
+paths:
+  /addlocker:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Create a locker
+      responses:
+        "200":
+          description: Created
+  /add:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Add item to locker
+      responses:
+        "200":
+          description: Added
+      requestBody:
+        description: Item to be added
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/AddItem"
+  /get:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Get item from locker
+      responses:
+        "200":
+          description: Retrieved
+      requestBody:
+        description: Item to be retrieved
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/GetItem"
+
+  /token:
+    post:
+      summary: Create a token
+      responses:
+        "200":
+          description: Created
+      requestBody:
+        description: User credentials
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/Token"
+
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+  schemas:
+    Token:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          default: "witek"
+        password:
+          type: string
+          default: "test123"
+    AddItem:
+      type: object
+      required:
+        - lockerid
+        - secretid
+        - content
+      properties:
+        lockerid:
+          type: string
+          default: "<>"
+        secretid:
+          type: string
+          default: "mykey"
+        content:
+          type: string
+          default: "tralalal"
+    GetItem:
+      type: object
+      required:
+        - lockerid
+        - secretid
+      properties:
+        lockerid:
+          type: string
+          default: "<>"
+        secretid:
+          type: string
+          default: "mykey"

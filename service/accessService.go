@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-kit/kit/log"
+	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
 	"github.com/mes1234/golock/internal/keys"
 	"github.com/mes1234/golock/internal/locker"
@@ -31,7 +33,11 @@ func (s accessService) Add(
 	repo := locker.GetRepository(reques.ClientId)
 	go repo.GetLocker(reques.LockerId, lockerCh)
 
-	l := <-lockerCh
+	l, ok := <-lockerCh
+
+	if !ok {
+		return adapters.AddItemResponse{Status: false}, nil
+	}
 
 	go l.AddItem(
 		reques.SecretId,
@@ -41,7 +47,7 @@ func (s accessService) Add(
 
 	err := <-errCh
 
-	go repo.UpdateLocker(l)
+	go repo.UpdateLocker(l, reques.LockerId, make(chan<- bool))
 
 	var status bool
 	if err != nil {
@@ -58,15 +64,28 @@ func (s accessService) Get(
 	ctx context.Context,
 	request adapters.GetItemRequest,
 ) (adapters.GetItemResponse, error) {
-	return adapters.GetItemResponse{
-		Content: locker.PlainContent{
-			Value: []byte("hello"),
-		}}, nil
+
+	lockerCh := make((chan locker.Locker))
+	go locker.GetRepository(request.ClientId).GetLocker(request.LockerId, lockerCh)
+
+	l, ok := <-lockerCh
+	if !ok {
+		return adapters.GetItemResponse{Content: make([]byte, 0)}, errors.New("error getting access to locker")
+	}
+
+	contentCh := make(chan []byte)
+	go l.GetItem(keys.Value{}, request.SecretId, contentCh)
+
+	c, ok := <-contentCh
+	if !ok {
+		return adapters.GetItemResponse{Content: make([]byte, 0)}, errors.New("error getting content")
+	}
+
+	return adapters.GetItemResponse{Content: c}, nil
 }
 
 // Remove item from locker
-func (s accessService) Remove(
-	ctx context.Context,
+func (s accessService) Remove(ctx context.Context,
 	request adapters.RemoveItemRequest,
 ) (adapters.RemoveItemResponse, error) {
 	return adapters.RemoveItemResponse{
@@ -80,9 +99,9 @@ func (s accessService) NewLocker(
 	request adapters.AddLockerRequest, // Identification of client
 ) (adapters.AddLockerResponse, error) {
 
-	lockerCh := make(chan locker.LockerId)
+	lockerCh := make(chan uuid.UUID)
 
-	go locker.GetRepository(request.ClientId).InitLocker(lockerCh)
+	go locker.GetRepository(request.ClientId).InitLocker(uuid.New(), lockerCh)
 
 	// Await response
 	response := adapters.AddLockerResponse{
