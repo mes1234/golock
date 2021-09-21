@@ -27,6 +27,6 @@ func (c crypter) encrypt(key keys.Value, plainContent []byte) Secret {
 }
 
 // decrypt is a function allowing to decrypt message using client identity and key
-func (c crypter) decrypt(keys.Value, Secret) []byte {
-	return make([]byte, 0)
+func (c crypter) decrypt(key keys.Value, s Secret) []byte {
+	return s.Content
 }

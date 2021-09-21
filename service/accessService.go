@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-kit/kit/log"
 	"github.com/google/uuid"
@@ -63,8 +64,24 @@ func (s accessService) Get(
 	ctx context.Context,
 	request adapters.GetItemRequest,
 ) (adapters.GetItemResponse, error) {
-	return adapters.GetItemResponse{
-		Content: make([]byte, 0)}, nil
+
+	lockerCh := make((chan locker.Locker))
+	go locker.GetRepository(request.ClientId).GetLocker(request.LockerId, lockerCh)
+
+	l, ok := <-lockerCh
+	if !ok {
+		return adapters.GetItemResponse{Content: make([]byte, 0)}, errors.New("error getting access to locker")
+	}
+
+	contentCh := make(chan []byte)
+	go l.GetItem(keys.Value{}, request.SecretId, contentCh)
+
+	c, ok := <-contentCh
+	if !ok {
+		return adapters.GetItemResponse{Content: make([]byte, 0)}, errors.New("error getting content")
+	}
+
+	return adapters.GetItemResponse{Content: c}, nil
 }
 
 // Remove item from locker

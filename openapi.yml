@@ -30,6 +30,21 @@ paths:
           text/plain:
             schema:
               $ref: "#/components/schemas/AddItem"
+  /get:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Get item from locker
+      responses:
+        "200":
+          description: Retrieved
+      requestBody:
+        description: Item to be retrieved
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/GetItem"
 
   /token:
     post:
@@ -80,3 +95,15 @@ components:
         content:
           type: string
           default: "tralalal"
+    GetItem:
+      type: object
+      required:
+        - lockerid
+        - secretid
+      properties:
+        lockerid:
+          type: string
+          default: "<>"
+        secretid:
+          type: string
+          default: "mykey"
