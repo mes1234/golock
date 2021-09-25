@@ -24,14 +24,14 @@ func NewAccessService(log log.Logger) AccessService {
 // Add item to locker
 func (s accessService) Add(
 	ctx context.Context,
-	reques adapters.AddItemRequest,
+	request adapters.AddItemRequest,
 ) (adapters.AddItemResponse, error) {
 
 	lockerCh := make(chan locker.Locker)
 	errCh := make(chan error)
 
-	repo := locker.GetRepository(reques.ClientId)
-	go repo.GetLocker(reques.LockerId, lockerCh)
+	repo := locker.GetRepository(request.ClientId)
+	go repo.Get(request.LockerId, lockerCh)
 
 	l, ok := <-lockerCh
 
@@ -40,14 +40,15 @@ func (s accessService) Add(
 	}
 
 	go l.AddItem(
-		reques.SecretId,
+		request.SecretId,
 		keys.Value{},
-		reques.Content,
+		request.Content,
+		0,
 		errCh)
 
 	err := <-errCh
 
-	go repo.UpdateLocker(l, reques.LockerId, make(chan<- bool))
+	go repo.Update(l, request.LockerId, make(chan<- bool))
 
 	var status bool
 	if err != nil {
@@ -66,7 +67,7 @@ func (s accessService) Get(
 ) (adapters.GetItemResponse, error) {
 
 	lockerCh := make(chan locker.Locker)
-	go locker.GetRepository(request.ClientId).GetLocker(request.LockerId, lockerCh)
+	go locker.GetRepository(request.ClientId).Get(request.LockerId, lockerCh)
 
 	l, ok := <-lockerCh
 	if !ok {
@@ -101,7 +102,7 @@ func (s accessService) NewLocker(
 
 	lockerCh := make(chan uuid.UUID)
 
-	go locker.GetRepository(request.ClientId).InitLocker(uuid.New(), lockerCh)
+	go locker.GetRepository(request.ClientId).Create(uuid.New(), lockerCh)
 
 	// Await response
 	response := adapters.AddLockerResponse{

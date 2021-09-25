@@ -8,9 +8,9 @@ import (
 	"github.com/mes1234/golock/internal/keys"
 )
 
-// Locker is container for all secrect
+// Locker is container for all secrets
 type memoryLocker struct {
-	Crypter  Crypter           // provide cryptgraphic functionality
+	Crypter  Crypter           // provide cryptographic functionality
 	Revision int               // revision of current locker
 	Id       uuid.UUID         // Identifier of locker
 	Client   uuid.UUID         // Identifiers of all clients with access
@@ -50,22 +50,29 @@ func (r *memoryLocker) IncreaseRevision() {
 	r.Revision = r.Revision + 1
 }
 
-// Add item to locker
+// AddItem adds item to locker
 func (r *memoryLocker) AddItem(
 	secretName string,
 	key keys.Value,
 	content []byte,
+	revision int,
 	resChan chan<- error) {
 
 	secret := r.Crypter.encrypt(keys.Value{}, content)
 	secret.Revision = r.Revision
 	secret.Active = true
+
+	// Nonzero revision forces locker to adjust to new one
+	if revision != 0 {
+		secret.Revision = revision
+		r.Revision = revision
+	}
 	r.Secrets[secretName] = secret
 
 	resChan <- nil
 }
 
-// Remove item from locker
+// RemoveItem removes item from locker
 func (r *memoryLocker) RemoveItem(
 	secretName string,
 	resChan chan<- error) {
@@ -83,7 +90,7 @@ func (r *memoryLocker) RemoveItem(
 	resChan <- nil
 }
 
-// Get item from locker
+// GetItem gets item from locker
 func (r *memoryLocker) GetItem(
 	key keys.Value,
 	secretName string,

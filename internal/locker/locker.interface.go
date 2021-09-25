@@ -10,19 +10,20 @@ type Locker interface {
 	GetClientId() uuid.UUID
 	ItemsToCommit() map[string]Secret
 
-	// Add item to locker
+	// AddItem Add item to locker
 	AddItem(
 		secretName string,
 		key keys.Value,
 		content []byte,
+		revision int,
 		resChan chan<- error)
 
-	// Remove item from locker
+	// RemoveItem Remove item from locker
 	RemoveItem(
 		secretName string,
 		resChan chan<- error)
 
-	// Get item from locker
+	// GetItem Get item from locker
 	GetItem(
 		key keys.Value,
 		secretName string,

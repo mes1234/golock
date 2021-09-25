@@ -28,12 +28,12 @@ func getMemoryRepository(clientId client.Id) Repository {
 	}
 }
 
-func (r *memoryRepository) UpdateLocker(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
+func (r *memoryRepository) Update(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	r.r[lockerId] = locker
 	resChan <- true
 }
 
-func (r *memoryRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
+func (r *memoryRepository) Get(lockerId uuid.UUID, resChan chan<- Locker) {
 	// Ensure thread safety
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -45,7 +45,7 @@ func (r *memoryRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) 
 	}
 }
 
-func (r *memoryRepository) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
+func (r *memoryRepository) Create(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 
 	// Ensure thread safety
 	r.mu.Lock()

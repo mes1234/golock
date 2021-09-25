@@ -18,7 +18,7 @@ func TestAddingItemToLocker(t *testing.T) {
 
 	resChan := make(chan error)
 
-	go l.AddItem("dummy", keys.Value{}, content, resChan)
+	go l.AddItem("dummy", keys.Value{}, content, 0, resChan)
 
 	err := <-resChan
 	if err != nil {
@@ -32,7 +32,7 @@ func TestGetItemFromLocker(t *testing.T) {
 
 	resChan := make(chan error)
 
-	go l.AddItem("dummy", keys.Value{}, content, resChan)
+	go l.AddItem("dummy", keys.Value{}, content, 0, resChan)
 
 	err := <-resChan
 	if err != nil {
@@ -55,7 +55,7 @@ func TestGetItemFailedLocker(t *testing.T) {
 
 	resChan := make(chan error)
 
-	go l.AddItem("dummy", keys.Value{}, content, resChan)
+	go l.AddItem("dummy", keys.Value{}, content, 0, resChan)
 
 	err := <-resChan
 	if err != nil {
@@ -80,7 +80,7 @@ func TestRemoveItemFailedGettingLocker(t *testing.T) {
 
 	resChan := make(chan error)
 
-	go l.AddItem("dummy", keys.Value{}, content, resChan)
+	go l.AddItem("dummy", keys.Value{}, content, 0, resChan)
 
 	err := <-resChan
 	if err != nil {

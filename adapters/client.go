@@ -37,6 +37,10 @@ type ClientId struct {
 	ClientId uuid.UUID
 }
 
+type LockerId struct {
+	LockerId uuid.UUID
+}
+
 type ClientName struct {
 	ClientName string
 }
