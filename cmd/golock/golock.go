@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	gokitjwt "github.com/go-kit/kit/auth/jwt"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"

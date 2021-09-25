@@ -28,7 +28,7 @@ func DecodeHttpAddItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err != nil {
 		return nil, err
 	}
-	secretid := (requestHttp.SecretId)
+	secretid := requestHttp.SecretId
 
 	content, err := base64.StdEncoding.DecodeString(requestHttp.Content)
 	if err != nil {
@@ -54,7 +54,7 @@ func DecodeHttpRemoveItemRequest(_ context.Context, r *http.Request) (interface{
 	if err != nil {
 		return nil, err
 	}
-	secretid := (requestHttp.SecretId)
+	secretid := requestHttp.SecretId
 
 	request := adapters.RemoveItemRequest{
 		LockerId: lockerId,
@@ -74,7 +74,7 @@ func DecodeHttpGetItemRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err != nil {
 		return nil, err
 	}
-	secretid := (requestHttp.SecretId)
+	secretid := requestHttp.SecretId
 
 	request := adapters.GetItemRequest{
 		LockerId: lockerId,

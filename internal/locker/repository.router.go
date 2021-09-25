@@ -6,10 +6,10 @@ import (
 )
 
 type repositoryRouter struct {
-	repositories []LockerRepository
+	repositories []Repository
 }
 
-func GetRepository(clientId client.ClientId) LockerRepository {
+func GetRepository(clientId client.Id) Repository {
 	repo := repositoryRouter{}
 	repo.repositories = append(repo.repositories, getMemoryRepository(clientId))
 	repo.repositories = append(repo.repositories, getDbRepository(clientId))
@@ -17,19 +17,19 @@ func GetRepository(clientId client.ClientId) LockerRepository {
 	return &repo
 }
 
-func (r *repositoryRouter) UpdateLocker(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
+func (r *repositoryRouter) Update(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	for _, v := range r.repositories {
-		go v.UpdateLocker(locker, lockerId, make(chan<- bool))
+		go v.Update(locker, lockerId, make(chan<- bool))
 	}
 	resChan <- true
 
 }
 
-func (r *repositoryRouter) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
+func (r *repositoryRouter) Get(lockerId uuid.UUID, resChan chan<- Locker) {
 
 	for _, v := range r.repositories {
 		lockerCh := make(chan Locker)
-		go v.GetLocker(lockerId, lockerCh)
+		go v.Get(lockerId, lockerCh)
 		res, ok := <-lockerCh
 		if ok {
 			res.IncreaseRevision()
@@ -40,10 +40,10 @@ func (r *repositoryRouter) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) 
 	close(resChan)
 }
 
-func (r *repositoryRouter) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
+func (r *repositoryRouter) Init(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 	for _, v := range r.repositories {
 		lockerCh := make(chan uuid.UUID)
-		go v.InitLocker(lockerId, lockerCh)
+		go v.Init(lockerId, lockerCh)
 		res, ok := <-lockerCh
 		if !ok {
 			resChan <- res

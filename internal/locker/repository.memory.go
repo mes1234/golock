@@ -10,7 +10,7 @@ import (
 type memoryRepository struct {
 	r  map[uuid.UUID]Locker
 	mu *sync.Mutex
-	c  client.ClientId
+	c  client.Id
 }
 
 var memRepository map[uuid.UUID]Locker
@@ -19,7 +19,7 @@ func init() {
 	memRepository = make(map[uuid.UUID]Locker)
 }
 
-func getMemoryRepository(clientId client.ClientId) LockerRepository {
+func getMemoryRepository(clientId client.Id) Repository {
 
 	return &memoryRepository{
 		r:  memRepository,
@@ -28,12 +28,12 @@ func getMemoryRepository(clientId client.ClientId) LockerRepository {
 	}
 }
 
-func (r *memoryRepository) UpdateLocker(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
+func (r *memoryRepository) Update(locker Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	r.r[lockerId] = locker
 	resChan <- true
 }
 
-func (r *memoryRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
+func (r *memoryRepository) Get(lockerId uuid.UUID, resChan chan<- Locker) {
 	// Ensure thread safety
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -45,7 +45,7 @@ func (r *memoryRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) 
 	}
 }
 
-func (r *memoryRepository) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
+func (r *memoryRepository) Init(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 
 	// Ensure thread safety
 	r.mu.Lock()

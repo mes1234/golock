@@ -11,12 +11,12 @@ import (
 type dbRepository struct {
 }
 
-func getDbRepository(clientId client.ClientId) LockerRepository {
+func getDbRepository(clientId client.Id) Repository {
 
 	return &dbRepository{}
 }
 
-func (r *dbRepository) UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<- bool) {
+func (r *dbRepository) Update(l Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	log.Print("update to db")
 
 	dbAccess := persistance.NewSecretRepository()
@@ -38,10 +38,10 @@ func (r *dbRepository) UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<-
 	resChan <- true
 }
 
-func (r *dbRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
+func (r *dbRepository) Get(lockerId uuid.UUID, resChan chan<- Locker) {
 	close(resChan)
 }
 
-func (r *dbRepository) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
+func (r *dbRepository) Init(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 	resChan <- lockerId
 }
