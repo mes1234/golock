@@ -13,7 +13,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-// Timing middleware decorator
+// AuthorizationMiddleware AuthorizationMiddleware Timing middleware decorator
 func AuthorizationMiddleware(logger log.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {

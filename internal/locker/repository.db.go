@@ -11,7 +11,7 @@ import (
 type dbRepository struct {
 }
 
-func getDbRepository(clientId client.ClientId) LockerRepository {
+func getDbRepository(clientId client.Id) Repository {
 
 	return &dbRepository{}
 }

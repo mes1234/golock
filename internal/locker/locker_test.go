@@ -66,7 +66,7 @@ func TestGetItemFailedLocker(t *testing.T) {
 	go l.GetItem(keys.Value{}, "dummy2", resChanGet)
 
 	// Make sure that the function does close the channel
-	_, ok := (<-resChanGet)
+	_, ok := <-resChanGet
 
 	// If we can recieve on the channel then it is NOT closed
 	if ok {
@@ -96,7 +96,7 @@ func TestRemoveItemFailedGettingLocker(t *testing.T) {
 	go l.GetItem(keys.Value{}, "dummy", resChanGet)
 
 	// Make sure that the function does close the channel
-	_, ok := (<-resChanGet)
+	_, ok := <-resChanGet
 
 	// If we can recieve on the channel then it is NOT closed
 	if ok {

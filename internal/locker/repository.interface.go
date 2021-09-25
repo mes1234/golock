@@ -2,7 +2,7 @@ package locker
 
 import "github.com/google/uuid"
 
-type LockerRepository interface {
+type Repository interface {
 	// Create locker for given client
 	InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID)
 

@@ -65,7 +65,7 @@ func (s accessService) Get(
 	request adapters.GetItemRequest,
 ) (adapters.GetItemResponse, error) {
 
-	lockerCh := make((chan locker.Locker))
+	lockerCh := make(chan locker.Locker)
 	go locker.GetRepository(request.ClientId).GetLocker(request.LockerId, lockerCh)
 
 	l, ok := <-lockerCh
@@ -93,7 +93,7 @@ func (s accessService) Remove(ctx context.Context,
 	}, nil
 }
 
-// Add new locker
+// NewLocker Add new locker
 func (s accessService) NewLocker(
 	ctx context.Context,
 	request adapters.AddLockerRequest, // Identification of client

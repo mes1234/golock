@@ -6,10 +6,10 @@ import (
 )
 
 type repositoryRouter struct {
-	repositories []LockerRepository
+	repositories []Repository
 }
 
-func GetRepository(clientId client.ClientId) LockerRepository {
+func GetRepository(clientId client.Id) Repository {
 	repo := repositoryRouter{}
 	repo.repositories = append(repo.repositories, getMemoryRepository(clientId))
 	repo.repositories = append(repo.repositories, getDbRepository(clientId))

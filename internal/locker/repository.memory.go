@@ -10,7 +10,7 @@ import (
 type memoryRepository struct {
 	r  map[uuid.UUID]Locker
 	mu *sync.Mutex
-	c  client.ClientId
+	c  client.Id
 }
 
 var memRepository map[uuid.UUID]Locker
@@ -19,7 +19,7 @@ func init() {
 	memRepository = make(map[uuid.UUID]Locker)
 }
 
-func getMemoryRepository(clientId client.ClientId) LockerRepository {
+func getMemoryRepository(clientId client.Id) Repository {
 
 	return &memoryRepository{
 		r:  memRepository,

@@ -18,7 +18,7 @@ type memoryLocker struct {
 
 }
 
-func GetMemoryLocker(clientId client.ClientId, lockerId uuid.UUID) Locker {
+func GetMemoryLocker(clientId client.Id, lockerId uuid.UUID) Locker {
 	return &memoryLocker{
 		Id:       lockerId,
 		Revision: 1,

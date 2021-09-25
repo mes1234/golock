@@ -6,7 +6,7 @@ import (
 	"github.com/mes1234/golock/adapters"
 )
 
-//Access interface describes a service that insert and retrieve data
+// AccessService Access interface describes a service that insert and retrieve data
 type AccessService interface {
 
 	// Add item to locker
@@ -27,7 +27,7 @@ type AccessService interface {
 		request adapters.RemoveItemRequest,
 	) (adapters.RemoveItemResponse, error) // status of operation
 
-	// Add new locker
+	// NewLocker Add new locker
 	NewLocker(
 		ctx context.Context,
 		request adapters.AddLockerRequest, // Identification of client
