@@ -1,6 +1,7 @@
 package locker
 
 import (
+	"github.com/mes1234/golock/internal/keys"
 	"log"
 
 	"github.com/google/uuid"
@@ -9,14 +10,16 @@ import (
 )
 
 type dbRepository struct {
+	ClientId uuid.UUID
 }
 
-func getDbRepository(clientId client.ClientId) LockerRepository {
-
-	return &dbRepository{}
+func getDbRepository(clientId client.Id) Repository {
+	return &dbRepository{
+		ClientId: clientId,
+	}
 }
 
-func (r *dbRepository) UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<- bool) {
+func (r *dbRepository) Update(l Locker, lockerId uuid.UUID, resChan chan<- bool) {
 	log.Print("update to db")
 
 	dbAccess := persistance.NewSecretRepository()
@@ -24,7 +27,7 @@ func (r *dbRepository) UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<-
 	items := l.ItemsToCommit()
 
 	for k, v := range items {
-		itemToPersisit := persistance.SecretPersisted{
+		itemToPersist := persistance.SecretPersisted{
 			Active:     v.Active,
 			Revision:   v.Revision,
 			Content:    v.Content,
@@ -32,16 +35,34 @@ func (r *dbRepository) UpdateLocker(l Locker, lockerId uuid.UUID, resChan chan<-
 			LockerId:   lockerId,
 			ClientId:   l.GetClientId(),
 		}
-		dbAccess.Insert(&itemToPersisit)
+		err := dbAccess.Insert(&itemToPersist)
+		if err != nil {
+			resChan <- false
+		}
 	}
 
 	resChan <- true
 }
 
-func (r *dbRepository) GetLocker(lockerId uuid.UUID, resChan chan<- Locker) {
-	close(resChan)
+func (r *dbRepository) Get(lockerId uuid.UUID, resChan chan<- Locker) {
+
+	dbAccess := persistance.NewSecretRepository()
+
+	secrets, err := dbAccess.Retrieve(lockerId)
+	if err != nil {
+		close(resChan)
+	}
+	newLocker := GetMemoryLocker(r.ClientId, lockerId)
+
+	for _, s := range secrets {
+		err := make(chan error, 0)
+		go newLocker.AddItem(s.SecretName, keys.Value{}, s.Content, s.Revision, err)
+		_ = <-err
+	}
+	resChan <- newLocker
 }
 
-func (r *dbRepository) InitLocker(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
+// Create in Db implementation single item is not represented by locker
+func (r *dbRepository) Create(lockerId uuid.UUID, resChan chan<- uuid.UUID) {
 	resChan <- lockerId
 }

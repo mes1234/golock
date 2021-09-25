@@ -8,7 +8,7 @@ import (
 	"github.com/mes1234/golock/service"
 )
 
-// Prepare endpoint for access service
+// MakeEndpoint Prepare endpoint for access service
 func MakeEndpoint(svc service.AccessService, endpoint string) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 

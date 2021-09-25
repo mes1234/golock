@@ -2,4 +2,4 @@ package client
 
 import "github.com/google/uuid"
 
-type ClientId = uuid.UUID // Identification of client
+type Id = uuid.UUID // Identification of client
