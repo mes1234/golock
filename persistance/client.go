@@ -11,7 +11,7 @@ import (
 var client *mongo.Client
 
 type ClientRepository interface {
-	Insert(*adapters.Client) error   //Insert client data to DB and assing ID
+	Insert(*adapters.Client) error   //Insert client data to DB and assign ID
 	Retrieve(*adapters.Client) error // Get id for given username and password if matched
 }
 

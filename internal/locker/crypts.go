@@ -1,6 +1,8 @@
 package locker
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/keys"
 )
@@ -20,13 +22,34 @@ func NewCrypter() Crypter {
 
 // encrypt is a function allowing to encrypt message using client identity and key
 func (c crypter) encrypt(key keys.Value, plainContent []byte) Secret {
+
+	cp, _ := aes.NewCipher(prepareKey(key))
+	gcm, _ := cipher.NewGCM(cp)
+	nonce := make([]byte, gcm.NonceSize())
+
+	encrypted := gcm.Seal(nonce, nonce, plainContent, nil)
 	return Secret{
 		Id:      uuid.New(),
-		Content: plainContent,
+		Content: encrypted,
 	}
+}
+
+func prepareKey(key keys.Value) []byte {
+	keyBytes := []byte(key.Key)
+	keyLen := len(keyBytes)
+	filler := make([]byte, 32-keyLen)
+	longKey := append(keyBytes, filler...)
+	return longKey
 }
 
 // decrypt is a function allowing to decrypt message using client identity and key
 func (c crypter) decrypt(key keys.Value, s Secret) []byte {
-	return s.Content
+
+	cp, _ := aes.NewCipher(prepareKey(key))
+	gcm, _ := cipher.NewGCM(cp)
+	nonce := make([]byte, gcm.NonceSize())
+	nonce, ciphertext := s.Content[:gcm.NonceSize()], s.Content[gcm.NonceSize():]
+
+	decrypted, _ := gcm.Open(nil, nonce, ciphertext, nil)
+	return decrypted
 }

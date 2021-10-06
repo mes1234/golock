@@ -1,4 +1,6 @@
 package keys
 
-// Value is defintion of key
-type Value struct{}
+// Value is definition of key
+type Value struct {
+	Key string
+}

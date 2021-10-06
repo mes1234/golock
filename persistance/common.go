@@ -3,6 +3,7 @@ package persistance
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +17,7 @@ func getDbCollection(collectionName string,
 	collection *mongo.Collection,
 	ctx context.Context) {
 	var err error
-	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://root:example@localhost:27017/"))
+	client, err = mongo.NewClient(options.Client().ApplyURI(os.Getenv("mongo_connection_string")))
 	if err != nil {
 		log.Fatal(err)
 	}

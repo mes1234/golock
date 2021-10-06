@@ -2,7 +2,6 @@ package locker
 
 import (
 	"errors"
-
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
 	"github.com/mes1234/golock/internal/keys"
@@ -58,7 +57,7 @@ func (r *memoryLocker) AddItem(
 	revision int,
 	resChan chan<- error) {
 
-	secret := r.Crypter.encrypt(keys.Value{}, content)
+	secret := r.Crypter.encrypt(key, content)
 	secret.Revision = r.Revision
 	secret.Active = true
 

@@ -3,6 +3,7 @@ package locker
 import (
 	"github.com/mes1234/golock/internal/keys"
 	"log"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/internal/client"
@@ -56,7 +57,7 @@ func (r *dbRepository) Get(lockerId uuid.UUID, resChan chan<- Locker) {
 
 	for _, s := range secrets {
 		err := make(chan error, 0)
-		go newLocker.AddItem(s.SecretName, keys.Value{}, s.Content, s.Revision, err)
+		go newLocker.AddItem(s.SecretName, keys.Value{Key: os.Getenv("go_key")}, s.Content, s.Revision, err)
 		_ = <-err
 	}
 	resChan <- newLocker
