@@ -19,7 +19,7 @@ type AccessService interface {
 	Get(
 		ctx context.Context,
 		request adapters.GetItemRequest,
-	) (adapters.GetItemResponse, error) // uncrypted content
+	) (adapters.GetItemResponse, error) // unencrypted content
 
 	// Remove item from locker
 	Remove(

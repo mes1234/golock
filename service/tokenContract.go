@@ -9,7 +9,7 @@ import (
 //TokenService interface describes a service that can get access tokens
 type TokenService interface {
 
-	// Add item to locker
+	// GetToken generates token based on username and password
 	GetToken(
 		ctx context.Context,
 		request adapters.TokenRequest,
