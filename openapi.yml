@@ -1,9 +1,10 @@
-openapi: "3.0.0"
+openapi: "3.1.0"
 info:
   version: 1.0.0
   title: Swagger Locker
   license:
     name: MIT
+    identifier: hello
 servers:
   - url: http://127.0.0.1:8080/
 paths:
@@ -15,6 +16,10 @@ paths:
       responses:
         "200":
           description: Created
+          content:
+              text/plain:
+                schema:
+                   $ref: '#/components/schemas/AddLockerResponse'
   /add:
     post:
       security:
@@ -23,6 +28,10 @@ paths:
       responses:
         "200":
           description: Added
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AddResponse'
       requestBody:
         description: Item to be added
         required: true
@@ -38,6 +47,10 @@ paths:
       responses:
         "200":
           description: Retrieved
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GetResponse'
       requestBody:
         description: Item to be retrieved
         required: true
@@ -45,13 +58,16 @@ paths:
           text/plain:
             schema:
               $ref: "#/components/schemas/GetItem"
-
   /token:
     post:
       summary: Create a token
       responses:
         "200":
           description: Created
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
       requestBody:
         description: User credentials
         required: true
@@ -78,7 +94,14 @@ components:
           default: "witek"
         password:
           type: string
-          default: "test123"
+          default: "test123" 
+    TokenResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
     AddItem:
       type: object
       required:
@@ -96,14 +119,42 @@ components:
           type: string
           default: "tralalal"
     GetItem:
-      type: object
-      required:
-        - lockerid
-        - secretid
-      properties:
-        lockerid:
-          type: string
-          default: "<>"
-        secretid:
-          type: string
-          default: "mykey"
+       type: object
+       required:
+              - lockerid
+              - secretid
+       properties:
+          lockerid:
+            type: string
+            default: "<>"
+          secretid:
+            type: string
+            default: "mykey"
+    AddLockerResponse:
+        type: object
+        required:
+          - lockerid
+        properties:
+            lockerid:
+               type: string
+    AddResponse:
+        type: object
+        required:
+          - status
+        properties:
+            status:
+               type: bool
+    RemoveResponse:
+        type: object
+        required:
+          - status
+        properties:
+            status:
+               type: bool
+    GetResponse:
+        type: object
+        required:
+          - content
+        properties:
+            content:
+               type: string

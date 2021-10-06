@@ -26,7 +26,7 @@ func (msg RemoveItemRequest) AssignClient(clientId uuid.UUID) interface{} {
 	return msg
 }
 
-// Client represent all data requried to perist and manage users
+// Client represent all data required to persist and manage users
 type Client struct {
 	ClientName string
 	ClientId   uuid.UUID

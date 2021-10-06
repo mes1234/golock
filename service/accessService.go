@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"errors"
-
 	"github.com/go-kit/kit/log"
 	"github.com/google/uuid"
 	"github.com/mes1234/golock/adapters"
 	"github.com/mes1234/golock/internal/keys"
 	"github.com/mes1234/golock/internal/locker"
+	"os"
 )
 
 type accessService struct {
@@ -41,7 +41,7 @@ func (s accessService) Add(
 
 	go l.AddItem(
 		request.SecretId,
-		keys.Value{},
+		keys.Value{Key: os.Getenv("go_key")},
 		request.Content,
 		0,
 		errCh)
@@ -75,7 +75,7 @@ func (s accessService) Get(
 	}
 
 	contentCh := make(chan []byte)
-	go l.GetItem(keys.Value{}, request.SecretId, contentCh)
+	go l.GetItem(keys.Value{Key: os.Getenv("go_key")}, request.SecretId, contentCh)
 
 	c, ok := <-contentCh
 	if !ok {

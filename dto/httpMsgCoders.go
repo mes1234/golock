@@ -87,6 +87,10 @@ func DecodeHttpGetItemRequest(_ context.Context, r *http.Request) (interface{}, 
 // Decode Http inbound message to domain accepted message
 func DecodeHttpGetTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var requestHttp GetTokenHttpInboundDto
+	//bodyBytes, _ := ioutil.ReadAll(r.Body)
+	//
+	//bodyString := string(bodyBytes)
+	//fmt.Println(bodyString)
 	if err := json.NewDecoder(r.Body).Decode(&requestHttp); err != nil {
 		return nil, err
 	}

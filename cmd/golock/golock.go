@@ -13,8 +13,6 @@ import (
 	"github.com/mes1234/golock/endpoints"
 	"github.com/mes1234/golock/middlewares"
 	"github.com/mes1234/golock/service"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -29,15 +27,6 @@ func main() {
 	removeItemEndpoint := endpoints.MakeEndpoint(svc, "removeitem")
 
 	tokenEndpoint := endpoints.MakeTokenEndpoint(tokenService)
-
-	// Attach Metrics
-	requstTimer := middlewares.NewPrometheusTimer()
-
-	addLockerEndpoint = requstTimer.TimingMetricMiddleware()(addLockerEndpoint)
-	addItemEndpoint = requstTimer.TimingMetricMiddleware()(addItemEndpoint)
-	getItemEndpoint = requstTimer.TimingMetricMiddleware()(getItemEndpoint)
-	removeItemEndpoint = requstTimer.TimingMetricMiddleware()(removeItemEndpoint)
-	tokenEndpoint = requstTimer.TimingMetricMiddleware()(tokenEndpoint)
 
 	// Attach  Authorization
 
@@ -97,9 +86,6 @@ func main() {
 		http.Handle("/remove", middlewares.AccessControl(removeFromLockerHandler))
 		http.Handle("/token", middlewares.AccessControl(tokenHandler))
 	}
-
-	// Expose metrics
-	http.Handle("/metrics", promhttp.Handler())
 
 	// Start server
 	http.ListenAndServe(":8080", nil)

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/go-kit/kit/log"
 	"github.com/golang-jwt/jwt"
@@ -47,7 +48,7 @@ func NewTokenService(log log.Logger) TokenService {
 }
 
 func getToken(clientId uuid.UUID) string {
-	key := []byte("test")
+	key := []byte(os.Getenv("go_key"))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.StandardClaims{
